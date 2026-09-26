@@ -7,7 +7,7 @@
 
 import {
   OWNER, ownerEmail, LOOKS, MODELS, greetings, FUN_PROMPTS, SOURCES, THINKING_VERBS,
-  OPENERS, SYCOPHANT_OPENERS, ATTACH_JOKES, MINI_ANSWERS, INTENTS, SEARCHED_INTENTS, TOPICS, REASONING,
+  OPENERS, SYCOPHANT_OPENERS, ATTACH_JOKES, FORM_PLACEHOLDERS, MINI_ANSWERS, INTENTS, SEARCHED_INTENTS, TOPICS, REASONING,
   ANSWERS, FLOW, LIMIT_NOTICE, NETWORK_ERROR, MODEL_QUIRKS
 } from './content.js';
 
@@ -411,6 +411,7 @@ function syncComposer() {
   prompt.disabled = locked;
   if (chatIsFull) prompt.placeholder = 'Start a new chat to continue';
   else if (outOfMessages) prompt.placeholder = `Out of free messages until ${resetsAt.crab}`;
+  else if (form.step) prompt.placeholder = FORM_PLACEHOLDERS[form.step];
   else prompt.placeholder = funPrompt;
 
   document.querySelectorAll('#suggestions button').forEach(b => { b.disabled = locked; });
@@ -420,7 +421,7 @@ function syncComposer() {
 // Clicking the empty input adopts the fake prompt on display, ready to send or edit.
 // Nobody wants to type "Draw me a cat" when it's already right there.
 function adoptFunPrompt() {
-  if (prompt.value || prompt.disabled) return;
+  if (prompt.value || prompt.disabled || form.step) return;
   prompt.value = funPrompt;
   autoGrow();
   syncComposer();
@@ -441,7 +442,7 @@ function showAttachJoke() {
 }
 
 function rotateFunPrompt() {
-  if (prompt.value || prompt.disabled) return;
+  if (prompt.value || prompt.disabled || form.step) return;
   funPrompt = pick(FUN_PROMPTS.filter(p => p !== funPrompt));
   syncComposer();
 }

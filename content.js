@@ -98,6 +98,13 @@ export const FUN_PROMPTS = [
   "Fix my code, it's urgent"
 ];
 
+// While the contact form is open, the input asks for the real thing instead of joking.
+export const FORM_PLACEHOLDERS = {
+  name: 'Your name',
+  message: 'Your message for Alex',
+  contact: 'Your email or phone number'
+};
+
 // Peer-reviewed. By peers.
 export const SOURCES = [
   'trustmebro.org',
