@@ -633,7 +633,7 @@ function setLook(look, announce = false) {
   syncLimits();
 
   if (announce && !app.classList.contains('is-empty')) {
-    messages.append(element('div', 'system-note', `Switched to ${settings.label} ${settings.emoji}`));
+    messages.append(element('div', 'system-note', `Switched to ${settings.brand} ${settings.label} ${settings.emoji}`));
     scrollToEnd();
   }
 

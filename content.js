@@ -21,6 +21,7 @@ export const ownerEmail = () =>
 export const LOOKS = {
   knot: {
     emoji: '🪢',
+    brand: 'CheapET',
     label: 'Aldebaran 5',
     disclaimer: 'CheapET will definitely make mistakes. Check important info.',
     other: 'crab',
@@ -29,6 +30,7 @@ export const LOOKS = {
   },
   crab: {
     emoji: '🦀',
+    brand: 'Clawdio',
     label: 'Epic 7',
     disclaimer: 'Clawdio will definitely make mistakes. Please double-check responses with Alex.',
     other: 'knot',
