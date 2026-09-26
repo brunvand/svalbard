@@ -58,7 +58,7 @@ export const MODELS = {
 
 export function greetings(look, now = new Date()) {
   const hour = now.getHours();
-  const weekday = now.toLocaleDateString('en-GB', { weekday: 'long' });
+  const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
   const partOfDay = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
   if (look === 'knot') {
@@ -123,6 +123,20 @@ export const OPENERS = {
   }
 };
 
+// The attach button. It attaches nothing, but at least it's honest about it.
+export const ATTACH_JOKES = {
+  knot: [
+    '📎 This is a website, not a repository.',
+    '📎 Uploads are a Pro feature. There is no Pro.',
+    "📎 Whatever it is, Alex doesn't want it as an attachment."
+  ],
+  crab: [
+    "I'm not able to accept attachments. This is a website, not a repository.",
+    "I'd rather not open files from strangers. I hope you understand.",
+    "I appreciate the gesture, but I have nowhere to put it."
+  ]
+};
+
 export const SYCOPHANT_OPENERS = [
   'OMG, what an AMAZING question!! 😍🔥',
   "Wow. Just wow. You're a genius for asking this. 🤩",
@@ -161,7 +175,7 @@ export const INTENTS = [
   ['self', /who are you|what are you|your name|which model|what model/i],
   ['contact', /contact|e-?mail|reach|hire|talk to|write to|get in touch|message|coffee|meet|linkedin|github|links?\b|social|phone/i],
   ['where', /where|hometown|which (city|country)|located|\bborn\b/i],
-  ['fun', /for fun|hobb(y|ies)|free time|spare time|interests|weekend/i],
+  ['fun', /for fun|hobb(y|ies)|free time|spare time|interests|weekend|lego|video ?games?|gaming|halo|forza|europa universalis/i],
   ['task', /\b(write|code|build|make) (me|my|an?|some)\b|essay|homework|translate|summari[sz]e|debug|fix my|cover letter|\bcv\b|resume/i],
   ['work', /work|project|portfolio|building|job|busy|doing|career/i],
   ['about', /alex|who is|who's|tell me about|owner|behind this/i],
@@ -214,8 +228,8 @@ export const ANSWERS = {
   about: {
     opener: true,
     offer: { knot: 'surprise' },
-    knot: ["Here's a quick overview:\n\n### 👤 Who Alex is\n- **Name:** Alex\n- **What he does:** Alex is a full-stack marketer, highly specialised in paid advertising, media buying and trickery in conversion tracking.\n- **Based in:** Milan, Italy, but available anywhere on the web.\n\nIn short: Alex is a human who does marketing and built a website that pretends to be a chatbot. (That's me! 😄)\n\nWould you like a **fun fact** about Alex?"],
-    crab: ["Alex is the person behind this website: a full-stack marketer, highly specialised in paid advertising, media buying and what he calls trickery in conversion tracking. He's based in Milan, Italy, though available anywhere on the web.\n\nI should be upfront about something: I'm not a real AI. I'm part of the website Alex built, doing my best impression of one.\n\nIs there anything specific you'd like to know about his work?"]
+    knot: ["Here's a quick overview:\n\n### 👤 Who Alex is\n- **Name:** Alex\n- **What he does:** Alex is a full-stack marketer, highly specialized in paid advertising, media buying and trickery in conversion tracking.\n- **Based in:** Milan, Italy, but available anywhere on the web.\n\nIn short: Alex is a human who does marketing and built a website that pretends to be a chatbot. (That's me! 😄)\n\nWould you like a **fun fact** about Alex?"],
+    crab: ["Alex is the person behind this website: a full-stack marketer, highly specialized in paid advertising, media buying and what he calls trickery in conversion tracking. He's based in Milan, Italy, though available anywhere on the web.\n\nI should be upfront about something: I'm not a real AI. I'm part of the website Alex built, doing my best impression of one.\n\nIs there anything specific you'd like to know about his work?"]
   },
 
   where: {
@@ -234,7 +248,7 @@ export const ANSWERS = {
 
   fun: {
     opener: true,
-    knot: ["Here's what Alex gets up to outside work: 🎉\n\n- **Collecting expensive Lego sets**\n- **Playing video games**\n- **Languages and history**\n- **Guilty pleasure:** challenging AI into building websites pretending to be chatbots.\n\nWant a **personalised recommendation** based on his hobbies? 😄"],
+    knot: ["Here's what Alex gets up to outside work: 🎉\n\n- **Collecting expensive Lego sets**\n- **Playing video games**\n- **Languages and history**\n- **Guilty pleasure:** challenging AI into building websites pretending to be chatbots.\n\nWant a **personalized recommendation** based on his hobbies? 😄"],
     crab: ["Outside work, Alex spends time buying expensive Lego sets and playing video games, besides refreshing his history knowledge. I find that combination genuinely charming (nerd).\n\nWhat about you? What do you do for fun?"]
   },
 
@@ -243,11 +257,15 @@ export const ANSWERS = {
     offer: { knot: 'surprise' },
     knot: [
       "Here's a fun one! 🎲\n\n**Alex built this website together with a crab named Clawdio.** 🦀\n\nWant another fun fact?",
-      "Did you know that **Svalbard has more polar bears than people**? 🐻‍❄️ That's exactly why Alex named the code behind this site Svalbard.\n\n*(It isn't.)*\n\n*Sources: trustmebro.org*\n\nWant another fun fact?"
+      "Did you know that **Svalbard has more polar bears than people**? 🐻‍❄️ That's exactly why Alex named the code behind this site Svalbard.\n\n*(It isn't.)*\n\n*Sources: trustmebro.org*\n\nWant another fun fact?",
+      "Here's one for the nerds! 🧱\n\nAlex's favorite Lego sets are the **space** ones. And the **LEGO Saturn V** has exactly **1,969 pieces**: the year of the Moon landing. 🚀🌕\n\nWant another fun fact?",
+      "Fun fact! 🎮 Alex's favorite video games are the **Halo**, **Forza** and **Europa Universalis** series.\n\nIn other words: fight aliens, drive very fast, then conquer Europe from a spreadsheet. A balanced diet. 🥗\n\nWant another fun fact?"
     ],
     crab: [
       "Here's something you might not expect: Alex built this website together with a crab named Clawdio. I'll admit I have a soft spot for that detail.",
-      "Here's one I find quietly fascinating: Svalbard has more polar bears than people, which is why Alex named the code behind this site Svalbard.\n\nActually, I should correct myself. That isn't why. I apologise for the confusion."
+      "Here's one I find quietly fascinating: Svalbard has more polar bears than people, which is why Alex named the code behind this site Svalbard.\n\nActually, I should correct myself. That isn't why. I apologize for the confusion.",
+      "Here's one I find rather lovely: Alex's favorite Lego sets are the space ones, and the LEGO Saturn V has exactly 1,969 pieces, a quiet nod to the year of the Moon landing. I appreciate that level of commitment.",
+      "Alex's favorite video games are the Halo, Forza and Europa Universalis series. I'd describe that as fighting aliens, driving very fast, and then conquering Europe through careful spreadsheet management. I wouldn't want to psychoanalyze anyone, but it's a fascinating range."
     ]
   },
 
@@ -275,7 +293,7 @@ export const ANSWERS = {
 
   eli5: {
     knot: ["Sure! Here's Alex, explained like you're five: 🧸\n\nYou know how shops put up posters so people buy their toys? Alex puts those posters on the internet, then counts how many people bought the toy. 📊\n\nThen he spends his money on more toys. Mostly Lego. 🧱\n\nThe end! Want the version for a **four-year-old**?"],
-    crab: ["Of course. When a company wants people to find what it sells, it pays to show adverts online. Alex decides where those adverts go, then carefully checks which ones actually worked.\n\nIn his free time he builds with Lego and plays video games, which, if you think about it, isn't so different.\n\nI hope that helps. Is there a part you'd like me to explain more simply?"]
+    crab: ["Of course. When a company wants people to find what it sells, it pays to show ads online. Alex decides where those ads go, then carefully checks which ones actually worked.\n\nIn his free time he builds with Lego and plays video games, which, if you think about it, isn't so different.\n\nI hope that helps. Is there a part you'd like me to explain more simply?"]
   },
 
   secret: {
@@ -301,7 +319,7 @@ export const ANSWERS = {
 
   correct: {
     knot: ["You're absolutely right to push back, and I appreciate you flagging it! 🙏\n\nLet me take another look… ✅ After careful review, **my previous answer still stands.**\n\nWant me to walk you through my reasoning step by step?"],
-    crab: ["You're absolutely right, and I apologise. I made a mistake. Thank you for pointing it out.\n\nTo be completely transparent, I'm not sure what the mistake was. But you seem confident, and I respect that."]
+    crab: ["You're absolutely right, and I apologize. I made a mistake. Thank you for pointing it out.\n\nTo be completely transparent, I'm not sure what the mistake was. But you seem confident, and I respect that."]
   },
 
   yes: {
@@ -311,7 +329,7 @@ export const ANSWERS = {
 
   thanks: {
     knot: ["You're very welcome! 😊 If you have any other questions about Alex, feel free to ask. I'm always here to help!"],
-    crab: ["You're very welcome! It was genuinely a pleasure. Feel free to come back any time."]
+    crab: ["You're very welcome! It was genuinely a pleasure. Feel free to come back anytime."]
   },
 
   fallback: {
@@ -375,7 +393,7 @@ export const FLOW = {
     crab: f => `Here's a third follow-up:\n\n\`\`\`email\n${followUp(f, true)}\n\`\`\`\n\nI want to gently point out that we may be going in circles. Would you like to start over?`
   },
   cancel: {
-    knot: () => "No problem! 👍 I've cancelled that. What else would you like to know about Alex?",
+    knot: () => "No problem! 👍 I've canceled that. What else would you like to know about Alex?",
     crab: () => "Of course, no problem at all. Is there anything else you'd like to know about Alex?"
   },
   upgrade: {
@@ -401,5 +419,5 @@ export const NETWORK_ERROR = {
 // Before-answer tweaks for the older models. Progress isn't always forward.
 export const MODEL_QUIRKS = {
   'Epic 4.6': { prefix: 'Before I answer, I want to acknowledge the limits of my knowledge, which are considerable.\n\n' },
-  'Epic 5': { suffix: '\n\nI apologise if any of this was unhelpful.' }
+  'Epic 5': { suffix: '\n\nI apologize if any of this was unhelpful.' }
 };

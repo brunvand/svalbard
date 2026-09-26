@@ -7,7 +7,7 @@
 
 import {
   OWNER, ownerEmail, LOOKS, MODELS, greetings, FUN_PROMPTS, SOURCES, THINKING_VERBS,
-  OPENERS, SYCOPHANT_OPENERS, MINI_ANSWERS, INTENTS, SEARCHED_INTENTS, TOPICS, REASONING,
+  OPENERS, SYCOPHANT_OPENERS, ATTACH_JOKES, MINI_ANSWERS, INTENTS, SEARCHED_INTENTS, TOPICS, REASONING,
   ANSWERS, FLOW, LIMIT_NOTICE, NETWORK_ERROR, MODEL_QUIRKS
 } from './content.js';
 
@@ -41,7 +41,7 @@ const between = ([min, max]) => min + Math.random() * (max - min);
 const shuffle = list => list.map(v => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(([, v]) => v);
 const sleep = ms => new Promise(resolve => setTimeout(resolve, reducedMotion ? 0 : ms));
 const currentLook = () => root.dataset.look;
-const clockTime = date => date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+const clockTime = date => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 const formatSeconds = s => (s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`);
 const scrollToEnd = () => { thread.scrollTop = thread.scrollHeight; };
 
@@ -417,6 +417,29 @@ function syncComposer() {
   sendButton.disabled = locked || busy || !prompt.value.trim();
 }
 
+// Clicking the empty input adopts the fake prompt on display, ready to send or edit.
+// Nobody wants to type "Draw me a cat" when it's already right there.
+function adoptFunPrompt() {
+  if (prompt.value || prompt.disabled) return;
+  prompt.value = funPrompt;
+  autoGrow();
+  syncComposer();
+  prompt.setSelectionRange(prompt.value.length, prompt.value.length);
+}
+
+let toastTimer = null;
+let lastJoke = '';
+
+function showAttachJoke() {
+  const toast = $('toast');
+  const joke = pick(ATTACH_JOKES[currentLook()].filter(j => j !== lastJoke));
+  lastJoke = joke;
+  toast.textContent = joke;
+  toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.hidden = true; }, 2800);
+}
+
 function rotateFunPrompt() {
   if (prompt.value || prompt.disabled) return;
   funPrompt = pick(FUN_PROMPTS.filter(p => p !== funPrompt));
@@ -650,6 +673,9 @@ function autoGrow() {
   prompt.style.height = 'auto';
   prompt.style.height = `${prompt.scrollHeight}px`;
 }
+
+prompt.addEventListener('click', adoptFunPrompt);
+$('attach').addEventListener('click', showAttachJoke);
 
 prompt.addEventListener('input', () => {
   autoGrow();

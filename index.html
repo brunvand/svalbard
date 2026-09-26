@@ -50,7 +50,8 @@
           <form class="composer" id="composer" autocomplete="off">
             <textarea id="prompt" rows="1" aria-label="Message" placeholder="Ask anything"></textarea>
             <!-- Attach files. Attaches nothing. Like most attachments. -->
-            <button type="button" class="icon-button attach" aria-label="Attach (does nothing)" tabindex="-1">
+            <p class="toast" id="toast" role="status" hidden></p>
+            <button type="button" class="icon-button attach" id="attach" aria-label="Attach files">
               <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
             </button>
             <button type="button" class="model-inline" id="model-inline" aria-haspopup="menu" aria-expanded="false"><span id="model-inline-name">Epic 7</span> ⌄</button>

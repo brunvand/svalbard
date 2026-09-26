@@ -1,5 +1,5 @@
 /*
- * Still here? These are just colours and margins.
+ * Still here? These are just colors and margins.
  * Nobody ever got hired for their margins. Keep scrolling anyway.
  */
 
@@ -366,6 +366,7 @@ button {
   background: var(--composer-bg);
   box-shadow: var(--composer-shadow);
   transition: background-color .35s, border-color .35s, border-radius .35s;
+  position: relative;
 }
 
 .composer textarea {
@@ -456,6 +457,33 @@ button {
   height: 32px;
   border: 1px solid var(--composer-border);
   border-radius: 9px;
+}
+
+/* The attach button's excuse, in a bubble above it */
+
+.toast {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  max-width: min(360px, 100%);
+  margin: 0;
+  padding: 9px 14px;
+  border-radius: 14px;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 13.5px;
+  line-height: 1.4;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .18);
+  pointer-events: none;
+  animation: pop .2s ease-out;
+}
+
+.toast[hidden] {
+  display: none;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(4px); }
 }
 
 /* ---------- Suggestions and disclaimer ---------- */
@@ -861,7 +889,8 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .thinking .dot,
   .thinking .shimmer,
-  .thinking .crab {
+  .thinking .crab,
+  .toast {
     animation: none;
   }
 
