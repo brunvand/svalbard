@@ -41,7 +41,7 @@ const between = ([min, max]) => min + Math.random() * (max - min);
 const shuffle = list => list.map(v => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(([, v]) => v);
 const sleep = ms => new Promise(resolve => setTimeout(resolve, reducedMotion ? 0 : ms));
 const currentLook = () => root.dataset.look;
-const clockTime = date => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+const clockTime = date => date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 const formatSeconds = s => (s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`);
 const scrollToEnd = () => { thread.scrollTop = thread.scrollHeight; };
 

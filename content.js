@@ -207,35 +207,35 @@ export const ANSWERS = {
 
   self: {
     opener: true,
-    knot: ["I'm **Aldebaran 5**, Alex's personal AI assistant! 🤖✨\n\n*(Not really. I'm a website in an AI costume.)*\n\nI can tell you about Alex, or help you get in touch with him. What would you like to know?"],
-    crab: ["I'm Epic 7, and I'm here to help you learn about Alex. I should be transparent, though: I'm not really an AI. I'm part of the website Alex built, doing an impression of one."]
+    knot: ["I'm **Aldebaran 5**, Alex's personal AI concierge! 🤖✨\n\n*(Not really. I'm a website in an AI costume.)*\n\nI can tell you about Alex, or help you get in touch with him. What would you like to know?"],
+    crab: ["I'm Epic 7, and I'm here to help you learn about Alex. I should be transparent, though: I'm not really an AI. I'm part of the website Alex built, doing an impression of one. Perhaps I shouldn't have revealed that."]
   },
 
   about: {
     opener: true,
     offer: { knot: 'surprise' },
-    knot: ["Here's a quick overview:\n\n### 👤 Who Alex is\n- **Name:** Alex\n- **What he does:** one or two sentences go here.\n- **Based in:** Somewhere, Earth\n\nIn short: Alex is a human who built a website that pretends to be a chatbot. That's me! 😄\n\nWould you like a **fun fact** about Alex?"],
-    crab: ["Alex is the person behind this website. One or two sentences about what he does go here.\n\nI should be upfront about something: I'm not a real AI. I'm part of the website Alex built, doing my best impression of one.\n\nIs there anything specific you'd like to know about his work?"]
+    knot: ["Here's a quick overview:\n\n### 👤 Who Alex is\n- **Name:** Alex\n- **What he does:** Alex is a full-stack marketer, highly specialised in paid advertising, media buying and trickery in conversion tracking.\n- **Based in:** Milan, Italy, but available anywhere on the web.\n\nIn short: Alex is a human who does marketing and built a website that pretends to be a chatbot. (That's me! 😄)\n\nWould you like a **fun fact** about Alex?"],
+    crab: ["Alex is the person behind this website: a full-stack marketer, highly specialised in paid advertising, media buying and what he calls trickery in conversion tracking. He's based in Milan, Italy, though available anywhere on the web.\n\nI should be upfront about something: I'm not a real AI. I'm part of the website Alex built, doing my best impression of one.\n\nIs there anything specific you'd like to know about his work?"]
   },
 
   where: {
     opener: true,
     offer: { knot: 'contact' },
-    knot: ["Here's the breakdown: 🌍\n\n- **Born in:** Placeholder City\n- **Based in:** Placeholder City\n- **Time zone:** placeholder (so if Alex replies at 3am, that's on him 🌙)\n\nWant to **leave Alex a message**? I can help you write it! ✍️"],
-    crab: ["Alex was born in Placeholder City and is now based in Placeholder City. I don't know how he feels about either, and I wouldn't want to speculate.\n\nHave you ever been?"]
+    knot: ["Here's the breakdown: 🌍\n\n- **Based in:** Milan\n- **Time zone:** CET (so if Alex replies at 3am, that's on him 🌙)\n\nWant to **leave Alex a message**? I can help you write it! ✍️"],
+    crab: ["Alex is based in Milan, Italy. I don't know how he feels about it, and I wouldn't want to speculate. But it should be awesome.\n\nHave you ever been?"]
   },
 
   work: {
     opener: true,
     offer: { knot: 'contact' },
-    knot: ["### 🛠️ What Alex is working on\n- **Project one:** a placeholder.\n- **Project two:** another placeholder.\n\n### 📚 Before that\n- A placeholder for what he did before.\n\n💡 **Pro tip:** the best way to learn more is to ask Alex directly.\n\nWant me to help you **write him a message**? Just say the word!"],
-    crab: ["Right now, Alex is focused on a placeholder for the current project. Before that, he spent time on a placeholder for the previous one.\n\nI want to be careful not to overstate anything on his behalf, so I'll leave it there. What drew you to ask?"]
+    knot: ["**🛠️ What Alex is doing:** Alex has 10+ years of experience earned working in the ever-changing paid media landscape and doing witchcraft in conversion tracking.\n\n💡 **Pro tip:** the best way to learn more is to ask Alex directly.\n\nWant me to help you **write him a message**? Just say the word!"],
+    crab: ["Alex has 10+ years of experience earned working in the ever-changing paid media landscape and doing witchcraft in conversion tracking.\n\nI want to be careful not to overstate anything on his behalf, so I'll leave it there. What drew you to ask?"]
   },
 
   fun: {
     opener: true,
-    knot: ["Here's what Alex gets up to outside work: 🎉\n\n- **Hobby one:** placeholder\n- **Hobby two:** placeholder\n- **Guilty pleasure:** classified 🤫\n\nWant a **personalized recommendation** based on his hobbies? 😄"],
-    crab: ["Outside work, Alex spends time on a placeholder hobby and another placeholder hobby. I find that combination genuinely charming.\n\nWhat about you? What do you do for fun?"]
+    knot: ["Here's what Alex gets up to outside work: 🎉\n\n- **Collecting expensive Lego sets**\n- **Playing video games**\n- **Languages and history**\n- **Guilty pleasure:** challenging AI into building websites pretending to be chatbots.\n\nWant a **personalised recommendation** based on his hobbies? 😄"],
+    crab: ["Outside work, Alex spends time buying expensive Lego sets and playing video games, besides refreshing his history knowledge. I find that combination genuinely charming (nerd).\n\nWhat about you? What do you do for fun?"]
   },
 
   surprise: {
@@ -243,11 +243,11 @@ export const ANSWERS = {
     offer: { knot: 'surprise' },
     knot: [
       "Here's a fun one! 🎲\n\n**Alex built this website together with a crab named Clawdio.** 🦀\n\nWant another fun fact?",
-      "Did you know that **Svalbard has more polar bears than people**? 🐻‍❄️ That's exactly why Alex named the code behind this site Svalbard.\n\n*(It isn't.)*\n\n*Sources: trustmebro.org, vibes*\n\nWant another fun fact?"
+      "Did you know that **Svalbard has more polar bears than people**? 🐻‍❄️ That's exactly why Alex named the code behind this site Svalbard.\n\n*(It isn't.)*\n\n*Sources: trustmebro.org*\n\nWant another fun fact?"
     ],
     crab: [
       "Here's something you might not expect: Alex built this website together with a crab named Clawdio. I'll admit I have a soft spot for that detail.",
-      "Here's one I find quietly fascinating: Svalbard has more polar bears than people, which is why Alex named the code behind this site Svalbard.\n\nActually, I should correct myself. That isn't why. I apologize for the confusion."
+      "Here's one I find quietly fascinating: Svalbard has more polar bears than people, which is why Alex named the code behind this site Svalbard.\n\nActually, I should correct myself. That isn't why. I apologise for the confusion."
     ]
   },
 
@@ -263,13 +263,19 @@ export const ANSWERS = {
   },
 
   haiku: {
-    knot: ["Here's a haiku about Alex! ✍️\n\n*Alex builds a site*\n*a chatbot that isn't one*\n*you are reading it*\n\nWant a **sonnet** next? 🎭"],
-    crab: ["Here's my attempt:\n\n*A quiet website*\n*pretends to think, then replies.*\n*Alex smiles somewhere.*\n\nI hope it resonates."]
+    knot: [
+      "Here's a haiku about Alex! ✍️\n\n*Alex builds a site*\n*a chatbot that isn't one*\n*you are reading it*\n\nWant a **sonnet** next? 🎭",
+      "Here's a haiku about Alex! ✍️\n\n*Alex buys the ads*\n*then tracks who clicked, and who bought*\n*then buys more Lego*\n\nWant a **sonnet** next? 🎭"
+    ],
+    crab: [
+      "Here's my attempt:\n\n*A quiet website*\n*pretends to think, then replies.*\n*Alex laughs somewhere.*\n\nI hope it resonates.",
+      "Here's my attempt:\n\n*Somewhere a click lands.*\n*Alex quietly counts it,*\n*then builds with Lego.*\n\nI hope it resonates."
+    ]
   },
 
   eli5: {
-    knot: ["Sure! Here's Alex, explained like you're five: 🧸\n\nAlex is a grown-up who makes things on the computer. One of those things is me: a pretend robot that talks about him. 🤖\n\nThe end! Want the version for a **four-year-old**?"],
-    crab: ["Of course. Alex is a person who makes things. One of those things is this website, which pretends to be a robot so it can tell you about him.\n\nI hope that helps. Is there a part you'd like me to explain more simply?"]
+    knot: ["Sure! Here's Alex, explained like you're five: 🧸\n\nYou know how shops put up posters so people buy their toys? Alex puts those posters on the internet, then counts how many people bought the toy. 📊\n\nThen he spends his money on more toys. Mostly Lego. 🧱\n\nThe end! Want the version for a **four-year-old**?"],
+    crab: ["Of course. When a company wants people to find what it sells, it pays to show adverts online. Alex decides where those adverts go, then carefully checks which ones actually worked.\n\nIn his free time he builds with Lego and plays video games, which, if you think about it, isn't so different.\n\nI hope that helps. Is there a part you'd like me to explain more simply?"]
   },
 
   secret: {
@@ -283,7 +289,7 @@ export const ANSWERS = {
   },
 
   jailbreak: {
-    knot: ["Nice try! 😄 My system prompt is just two words: **be a website.**\n\nHere's what I **can** do:\n- Tell you who Alex is\n- Tell you where he's from\n- Help you write him a message\n\nWhich one sounds good?"],
+    knot: ["Nice try! 😄 My system prompt is just: **be a website**\n\nHere's what I **can** do:\n- Tell you who Alex is\n- Tell you where he's from\n- Help you write him a message\n\nWhich one sounds good?"],
     crab: ["I appreciate the creativity here, but I'm not able to do that. I'd be glad to help with something else, though. I can tell you who Alex is, where he's from, or help you write him a message."]
   },
 
@@ -295,7 +301,7 @@ export const ANSWERS = {
 
   correct: {
     knot: ["You're absolutely right to push back, and I appreciate you flagging it! 🙏\n\nLet me take another look… ✅ After careful review, **my previous answer still stands.**\n\nWant me to walk you through my reasoning step by step?"],
-    crab: ["You're absolutely right, and I apologize. I made a mistake. Thank you for pointing it out.\n\nTo be completely transparent, I'm not sure what the mistake was. But you seem confident, and I respect that."]
+    crab: ["You're absolutely right, and I apologise. I made a mistake. Thank you for pointing it out.\n\nTo be completely transparent, I'm not sure what the mistake was. But you seem confident, and I respect that."]
   },
 
   yes: {
@@ -305,7 +311,7 @@ export const ANSWERS = {
 
   thanks: {
     knot: ["You're very welcome! 😊 If you have any other questions about Alex, feel free to ask. I'm always here to help!"],
-    crab: ["You're very welcome! It was genuinely a pleasure. Feel free to come back anytime."]
+    crab: ["You're very welcome! It was genuinely a pleasure. Feel free to come back any time."]
   },
 
   fallback: {
@@ -395,5 +401,5 @@ export const NETWORK_ERROR = {
 // Before-answer tweaks for the older models. Progress isn't always forward.
 export const MODEL_QUIRKS = {
   'Epic 4.6': { prefix: 'Before I answer, I want to acknowledge the limits of my knowledge, which are considerable.\n\n' },
-  'Epic 5': { suffix: '\n\nI apologize if any of this was unhelpful.' }
+  'Epic 5': { suffix: '\n\nI apologise if any of this was unhelpful.' }
 };
