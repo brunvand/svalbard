@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Soon.</title>
+  <meta name="description" content="Something is being built here.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Inter+Tight:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink: #111; --paper: #f4f1ea; --muted: #6b665c; }
+    @media (prefers-color-scheme: dark) { :root { --ink: #f4f1ea; --paper: #0f0f0e; --muted: #9a958a; } }
+    * { margin: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      background: var(--paper); color: var(--ink);
+      font-family: "Inter Tight", system-ui, sans-serif;
+      display: grid; grid-template-rows: 1fr auto;
+      padding: clamp(16px, 4vw, 48px);
+      overflow: hidden;
+    }
+    h1 {
+      align-self: end;
+      font-family: "Instrument Serif", serif; font-style: italic; font-weight: 400;
+      font-size: clamp(6rem, 32vw, 30rem); line-height: .8; letter-spacing: -.04em;
+    }
+    h1 span { display: inline-block; animation: rise .9s cubic-bezier(.2,.8,.2,1) both; }
+    h1 span:nth-child(2) { animation-delay: .06s } h1 span:nth-child(3) { animation-delay: .12s }
+    h1 span:nth-child(4) { animation-delay: .18s } h1 span:nth-child(5) { animation-delay: .24s }
+    @keyframes rise { from { transform: translateY(40%); opacity: 0 } }
+    @media (prefers-reduced-motion: reduce) { h1 span { animation: none } }
+    p { color: var(--muted); font-size: .95rem; padding-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <h1 aria-label="Soon."><span>S</span><span>o</span><span>o</span><span>n</span><span>.</span></h1>
+  <p>Something is being built here.</p>
+</body>
+</html>
