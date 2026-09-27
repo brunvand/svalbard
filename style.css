@@ -138,6 +138,7 @@ body {
 button {
   font: inherit;
   color: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 
 :focus-visible {
@@ -147,6 +148,7 @@ button {
 
 .app {
   height: 100%;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -486,10 +488,19 @@ button {
   from { opacity: 0; transform: translateY(4px); }
 }
 
-/* The same switch, spelled out under the input on a brand-new chat */
+/* The same switch, spelled out at the bottom of a brand-new chat */
+
+.page-footer {
+  display: flex;
+  justify-content: center;
+  padding: 0 16px calc(8px + env(safe-area-inset-bottom, 0px));
+}
+
+.app:not(.is-empty) .page-footer {
+  display: none;
+}
 
 .look-switch-inline {
-  align-self: center;
   padding: 6px 12px;
   border: 0;
   border-radius: 999px;
@@ -502,10 +513,6 @@ button {
 .look-switch-inline:hover {
   background: var(--hover);
   color: var(--fg);
-}
-
-.app:not(.is-empty) .look-switch-inline {
-  display: none;
 }
 
 /* ---------- Suggestions and disclaimer ---------- */
@@ -904,6 +911,78 @@ button {
 .model-menu .check {
   grid-area: check;
   font-size: 14px;
+}
+
+/* ---------- Phones ----------
+ * Like the real apps: greeting in the middle, input pinned to the bottom,
+ * suggestions in one row you swipe sideways. */
+
+@media (max-width: 640px) {
+  .topbar {
+    min-height: 52px;
+    padding: 8px 10px;
+  }
+
+  .model-picker {
+    font-size: 17px;
+  }
+
+  .app.is-empty .main {
+    justify-content: flex-end;
+    padding-bottom: 0;
+  }
+
+  .app.is-empty .dock {
+    flex: 1;
+    display: flex;
+  }
+
+  .app.is-empty .dock-inner {
+    flex: 1;
+  }
+
+  .hero {
+    flex: 1;
+    align-items: center;
+    min-height: 0;
+  }
+
+  .suggestions {
+    order: 1;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    margin-inline: -16px;
+    padding: 2px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .suggestions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .suggestions button {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .limit-banner {
+    order: 2;
+    font-size: 13px;
+  }
+
+  .composer {
+    order: 3;
+  }
+
+  .disclaimer {
+    order: 4;
+    font-size: 11px;
+  }
+
+  .user-message {
+    max-width: 85%;
+  }
 }
 
 /* ---------- Reduced motion ---------- */

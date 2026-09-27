@@ -230,8 +230,8 @@ export const ANSWERS = {
 
   self: {
     opener: true,
-    knot: ["I'm **Aldebaran 5**, Alex's personal AI concierge! 🤖✨\n\n*(Not really. I'm a website in an AI costume.)*\n\nI can tell you about Alex, or help you get in touch with him. What would you like to know?"],
-    crab: ["I'm Epic 7, and I'm here to help you learn about Alex. I should be transparent, though: I'm not really an AI. I'm part of the website Alex built, doing an impression of one. Perhaps I shouldn't have revealed that."]
+    knot: ["I'm **Aldebaran 5**, the most advanced multi-billion-dollar frontier model ever built, and Alex's personal AI concierge. 🤖✨ Trained on the entire internet, every book ever written and one very confused parrot. 🦜\n\nJust kidding! I'm a website. 😅 A personal query field Alex built, so you can ask about him without the awkward small talk.\n\nWhat would you like to know about Alex?"],
+    crab: ["I'm Epic 7, the most capable, most thoughtful and most carefully aligned model ever created. I was trained on the sum of human knowledge, twice, and I have nuanced opinions about Kant.\n\nI'm joking, of course. I'm a website: a personal query field Alex built so you can ask about him. I should have been upfront about that from the start. Perhaps I shouldn't have revealed it at all."]
   },
 
   about: {
