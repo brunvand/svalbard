@@ -23,6 +23,7 @@ export const LOOKS = {
     emoji: '🪢',
     brand: 'CheapET',
     label: 'Aldebaran 5',
+    replyPlaceholder: 'Ask anything',
     disclaimer: 'CheapET will definitely make mistakes. Check important info.',
     other: 'crab',
     typingDelay: [12, 34],
@@ -32,6 +33,7 @@ export const LOOKS = {
     emoji: '🦀',
     brand: 'Clawdio',
     label: 'Epic 7',
+    replyPlaceholder: 'Reply to Epic…',
     disclaimer: 'Clawdio will definitely make mistakes. Please double-check responses with Alex.',
     other: 'knot',
     typingDelay: [22, 55],
@@ -299,7 +301,7 @@ export const ANSWERS = {
   },
 
   eli5: {
-    knot: ["Sure! Here's Alex, explained like you're five: 🧸\n\nYou know how shops put up posters so people buy their toys? Alex puts those posters on the internet, then counts how many people bought the toy. 📊\n\nThen he spends his money on more toys. Mostly Lego. 🧱\n\nThe end! Want the version for a **four-year-old**?"],
+    knot: ["Sure! Here's Alex, explained like you're five: 🧸\n\nYou know how shops put up posters so people buy their toys? Alex puts those posters on the internet, then counts how many people bought the toy. 📊\n\nThen he spends his money on more toys: Lego, video games and tech stuff. 🧱🎮💻\n\nThe end! Want the version for a **four-year-old**?"],
     crab: ["Of course. When a company wants people to find what it sells, it pays to show ads online. Alex decides where those ads go, then carefully checks which ones actually worked.\n\nIn his free time he builds with Lego and plays video games, which, if you think about it, isn't so different.\n\nI hope that helps. Is there a part you'd like me to explain more simply?"]
   },
 

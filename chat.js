@@ -16,7 +16,7 @@ import {
 const QUESTION_LIMIT = 10;        // Free plan. Generous, by industry standards.
 const SPAM_WINDOW_MS = 15000;     // Four messages in this window counts as spam.
 const SPAM_BURST = 4;
-const LONG_CHAT = 22;             // Messages before the "context window" gives up.
+const LONG_CHAT = 20;             // Messages sent before the "context window" gives up.
 const NETWORK_ERROR_RATE = 0.08;  // Reliability: 92%. Better than some real ones.
 const PROMPT_ROTATION_MS = 6000;
 
@@ -231,10 +231,16 @@ function thinkingIndicator(look, label) {
  * It returns markdown, or { markdown, note, reasoning, sources, button, error }. */
 
 let busy = false;
-let messageCount = 0;
+let messageCount = 0;   // Messages the visitor has sent in this chat.
+let botAsked = false;   // The last reply ended with a question, so the jokes step aside.
+
+// A reply "asks" when its last paragraph has a question in it:
+// "Want to leave Alex a message? I can help you write it! ✍️" counts.
+const endsWithQuestion = markdown => markdown.trim().split(/\n\n+/).pop().includes('?');
 
 async function respond(produce, existing = null) {
   busy = true;
+  botAsked = false;
   syncComposer();
 
   const look = currentLook();
@@ -269,7 +275,7 @@ async function respond(produce, existing = null) {
     renderReply(message, reply, settings);
     await typeOut(message.querySelector('.body'), reply.markdown, settings.typingDelay);
     renderAfterwords(message, reply);
-    if (!existing) messageCount++;
+    botAsked = endsWithQuestion(reply.markdown);
   }
 
   scrollToEnd();
@@ -412,16 +418,20 @@ function syncComposer() {
   if (chatIsFull) prompt.placeholder = 'Start a new chat to continue';
   else if (outOfMessages) prompt.placeholder = `Out of free messages until ${resetsAt.crab}`;
   else if (form.step) prompt.placeholder = FORM_PLACEHOLDERS[form.step];
+  else if (botAsked) prompt.placeholder = LOOKS[currentLook()].replyPlaceholder;
   else prompt.placeholder = funPrompt;
 
   document.querySelectorAll('#suggestions button').forEach(b => { b.disabled = locked; });
   sendButton.disabled = locked || busy || !prompt.value.trim();
 }
 
+// Fake prompts step aside while the assistant is waiting for a real answer.
+const funPromptsPaused = () => Boolean(form.step) || botAsked;
+
 // Clicking the empty input adopts the fake prompt on display, ready to send or edit.
 // Nobody wants to type "Draw me a cat" when it's already right there.
 function adoptFunPrompt() {
-  if (prompt.value || prompt.disabled || form.step) return;
+  if (prompt.value || prompt.disabled || funPromptsPaused()) return;
   prompt.value = funPrompt;
   autoGrow();
   syncComposer();
@@ -442,7 +452,7 @@ function showAttachJoke() {
 }
 
 function rotateFunPrompt() {
-  if (prompt.value || prompt.disabled || form.step) return;
+  if (prompt.value || prompt.disabled || funPromptsPaused()) return;
   funPrompt = pick(FUN_PROMPTS.filter(p => p !== funPrompt));
   syncComposer();
 }
@@ -591,6 +601,7 @@ function newChat() {
   form = emptyForm();
   offer = null;
   messageCount = 0;
+  botAsked = false;
   chatIsFull = false;
   syncComposer();
   if (!prompt.disabled) prompt.focus();
@@ -652,6 +663,7 @@ function setLook(look, announce = false) {
   $('look-switch-emoji').textContent = other.emoji;
   $('look-switch').setAttribute('aria-label', `Switch to ${other.label}`);
   $('look-switch').title = `Switch to ${other.label} ${other.emoji}`;
+  $('look-switch-inline').textContent = `Switch to ${other.brand} ${other.emoji}`;
   $('model-picker').style.visibility = look === 'knot' ? 'visible' : 'hidden';
   $('chat-title').classList.toggle('is-visible', look === 'crab' && !app.classList.contains('is-empty'));
   syncLimits();
@@ -697,6 +709,7 @@ $('composer').addEventListener('submit', event => {
 
 document.querySelectorAll('#suggestions button').forEach(b => b.addEventListener('click', () => ask(b.textContent)));
 $('look-switch').addEventListener('click', () => setLook(LOOKS[currentLook()].other, true));
+$('look-switch-inline').addEventListener('click', () => setLook(LOOKS[currentLook()].other));
 $('new-chat').addEventListener('click', newChat);
 $('upgrade').addEventListener('click', upgrade);
 
