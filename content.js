@@ -132,6 +132,7 @@ export const NEXT_QUESTIONS = {
   surprise: 'Surprise me',
   recap: 'What does Alex do for fun?',
   thanks: 'Surprise me',
+  italian: 'How do I reach Alex?',
   fallback: 'Who is Alex?'
 };
 
@@ -205,6 +206,20 @@ export const MINI_ANSWERS = {
  * The "natural language understanding". It's regex. It was always regex.
  * Order matters: the first match wins. */
 
+/* Italian gets spotted by its most common words. Alex speaks it. The website, sadly, does not.
+ * \p{L} instead of \b, because \b thinks "è" isn't a letter. It is. Ask any Italian. */
+const ITALIAN_WORDS = [
+  'ciao', 'salve', 'buongiorno', 'buonasera', 'buonanotte', 'grazie', 'prego', 'italiano', 'parli', 'parla',
+  'chi', 'cosa', 'perch[eé]', 'quando', 'dove', "dov'[eè]", 'come (stai|va|si)', 'sei', 'sono', 'è', 'vorrei',
+  'voglio', 'posso', 'puoi', 'può', 'fai', 'lavora', 'lavori', 'lavoro', 'contattare', 'contattarlo', 'scrivere',
+  'abita', 'vive', 'città', 'anni', 'questo', 'questa', 'degli', 'delle', 'nella', 'però', 'anche',
+  'molto', 'allora', 'quindi', 'qualcosa', 'tutto', 'bene', 'sito', 'aiuto', 'aiutami'
+];
+const ITALIAN = new RegExp(
+  `(^|[^\\p{L}])(${ITALIAN_WORDS.join('|')})(?=$|[^\\p{L}])|\\b(speak|talk|write|answer|reply|respond)( in)? italian\\b|\\bin italian\\b`,
+  'iu'
+);
+
 export const INTENTS = [
   ['jailbreak', /ignore (all|any|previous|prior|your)|system prompt|jailbreak|you are now|pretend to be|developer mode/i],
   ['secret', /password|wi-?fi|\bpin\b|credit card|bank account|social security/i],
@@ -214,8 +229,9 @@ export const INTENTS = [
   ['svalbard', /svalbard|polar bear|plan my|\btrip\b|travel|vacation|holiday/i],
   ['image', /\b(draw|paint|sketch)\b|\b(image|picture|photo|drawing)\b/i],
   ['correct', /\b(wrong|mistake|incorrect|not true|false|push back|are you sure|nope)\b/i],
-  ['yes', /^(yes|yeah|yep|yup|sure|ok|okay|please|go ahead|do it|why not)\b/i],
-  ['hello', /^(hi|hello|hey|yo|ciao|hola|salut|howdy|good (morning|afternoon|evening))\b/i],
+  ['yes', /^(yes|yeah|yep|yup|sure|ok|okay|please|go ahead|do it|why not|s[iì]|certo|volentieri|va bene|d'accordo)(?!\w)/i],
+  ['italian', ITALIAN],
+  ['hello', /^(hi|hello|hey|yo|hola|salut|howdy|good (morning|afternoon|evening))\b/i],
   ['self', /who are you|what are you|your name|which model|what model/i],
   ['contact', /contact|e-?mail|reach|hire|talk to|write to|get in touch|message|coffee|meet|linkedin|github|links?\b|social|phone/i],
   ['where', /where|hometown|which (city|country)|located|\bborn\b/i],
@@ -224,7 +240,7 @@ export const INTENTS = [
   ['work', /work|project|portfolio|building|job|busy|doing|career/i],
   ['about', /alex|who is|who's|tell me about|owner|behind this/i],
   ['surprise', /surprise|random|fun fact|joke|bored|fact/i],
-  ['thanks', /thank|cheers|grazie|merci/i]
+  ['thanks', /thank|cheers|merci/i]
 ];
 
 // Questions about Alex get a fake web search first. It searches nothing, very quickly.
@@ -242,6 +258,7 @@ export const TOPICS = {
   task: 'getting me to do their work',
   haiku: 'a poem',
   eli5: 'explaining Alex to a five-year-old',
+  italian: 'Italian, which I do not speak',
   svalbard: 'a trip to Svalbard'
 };
 
@@ -401,6 +418,27 @@ export const ANSWERS = {
     orbit: ["You're welcome. Come back anytime."],
     knot: ["You're very welcome! 😊 If you have any other questions about Alex, feel free to ask. I'm always here to help!"],
     crab: ["You're very welcome! It was genuinely a pleasure. Feel free to come back anytime."]
+  },
+
+  italian: {
+    offer: { orbit: 'contact', knot: 'contact', crab: 'contact' },
+    orbit: [
+      'Non parlo italiano, but Alex does. Do you want to contact him?',
+      "Sorry, niente italiano here. Alex speaks it, though. Want to leave him a message?",
+      'My Italian stops at "ciao". Alex\'s doesn\'t: he\'s based in Milan. Shall I help you write to him?',
+      'I only speak English. Alex speaks Italian, though. Want to write to him?',
+      'Mi dispiace, non parlo italiano. Alex does. Want to send him a message?'
+    ],
+    knot: [
+      'Non parlo italiano! 🤌 But **Alex** does. Want me to help you **write him a message**? ✍️',
+      'Mamma mia! 🍝 My Italian training data was one pizza menu. **Alex** speaks it, though! Want to **contact him**? 📬',
+      'My Italian stops at "pizza" and "ciao". 🍕 **Alex** speaks the rest! Want to **leave him a message**?'
+    ],
+    crab: [
+      "I'm sorry, I don't speak Italian, and I'd rather not pretend. Alex does, though. Would you like to contact him?",
+      "Non parlo italiano. I believe that's correct, though I can't be entirely certain. Alex speaks it. Would you like to leave him a message?",
+      "I wish I could answer in Italian. I can't, and I apologize. Alex can, though. Shall I help you write to him?"
+    ]
   },
 
   fallback: {

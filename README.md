@@ -4,6 +4,7 @@ Personal website: a chat assistant that answers questions about Alex.
 Plain HTML, CSS and JavaScript, no build step, no dependencies, no model.
 
 - `index.html` – the page
+- `404.html` – sends every other address back to the page, keeping `#knot` or `#crab`
 - `style.css` – all three looks: Alex's own (night and day), CheapET and Clawdio
 - `content.js` – everything the assistant says
 - `chat.js` – the engine that pretends to think
