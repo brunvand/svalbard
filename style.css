@@ -1083,8 +1083,13 @@ button {
   opacity: .5;
 }
 
+/* The name sits dead center, whatever the buttons on the right are doing */
 :root[data-look="orbit"] .wordmark {
   display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   padding: 0;
   border: 0;
   background: transparent;
@@ -1120,6 +1125,10 @@ button {
 
 :root[data-look="orbit"] .topbar {
   padding: 12px 20px;
+}
+
+:root[data-look="orbit"] .topbar-actions {
+  margin-left: auto;
 }
 
 :root[data-look="orbit"] .messages,
@@ -1447,5 +1456,13 @@ button {
   .planet,
   .sky canvas {
     transition: none;
+  }
+}
+
+/* The smallest phones: the name shrinks a little, so it never bumps into the buttons */
+@media (max-width: 374px) {
+  :root[data-look="orbit"] .wordmark {
+    font-size: 11px;
+    letter-spacing: .16em;
   }
 }
