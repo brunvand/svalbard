@@ -3,9 +3,63 @@
  * Nobody ever got hired for their margins. Keep scrolling anyway.
  */
 
+/* ---------- Fonts ----------
+ * All hosted right here. No font CDN gets to know you visited.
+ * "Alex Wordmark" is Michroma with its V turned upside down to make the A. Licenses in /fonts. */
+
+@font-face {
+  font-family: "Alex Wordmark";
+  src: url("fonts/alex-wordmark.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("fonts/geist-300.woff2") format("woff2");
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("fonts/geist-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("fonts/geist-500.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Source Serif 4";
+  src: url("fonts/source-serif-4-300.woff2") format("woff2");
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Source Serif 4";
+  src: url("fonts/source-serif-4-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Source Serif 4";
+  src: url("fonts/source-serif-4-400-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
 /* ---------- Tokens ----------
- * Two looks: "knot" (the default) and "crab". Each has a light and a dark palette.
- * The dark palette follows the visitor's system setting, or data-theme when a host sets one. */
+ * Three looks. "orbit" (the default) is night unless the visitor asks for day.
+ * "knot" and "crab" have light and dark palettes that follow the visitor's system setting. */
 
 :root,
 :root[data-look="knot"] {
@@ -107,11 +161,56 @@
   color-scheme: dark;
 }
 
+/* Orbit comes after the others so it wins, whatever the system setting says. */
+
+:root[data-look="orbit"] {
+  --bg: #04060A;
+  --fg: #E8EDF3;
+  --reply: #E8EDF3;
+  --muted: #8592A3;
+  --bubble: #121A25;
+  --composer-bg: color-mix(in srgb, #0B1017 86%, transparent);
+  --composer-border: #1E2936;
+  --composer-shadow: 0 20px 60px -30px color-mix(in srgb, var(--glow) 40%, transparent);
+  --line: #1E2936;
+  --send-bg: #E8EDF3;
+  --send-fg: #04060A;
+  --hover: #121A25;
+  --glow: #7FB2FF;
+  --sky: #04060A;
+  --sun: none;
+  --surface: radial-gradient(circle at 50% 0, #121A25, #04060A 18%);
+  --stars: 1;
+  --sans: "Geist", ui-sans-serif, -apple-system, system-ui, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+
+:root[data-look="orbit"][data-theme="light"] {
+  --bg: #F2F7FD;
+  --fg: #0A1220;
+  --reply: #0A1220;
+  --muted: #4D5D74;
+  --bubble: #F3F7FC;
+  --composer-bg: color-mix(in srgb, #FFFFFF 86%, transparent);
+  --composer-border: #C9D8EA;
+  --line: #C9D8EA;
+  --send-bg: #0A1220;
+  --send-fg: #FFFFFF;
+  --hover: #E6EFFA;
+  --glow: #3B7FE6;
+  --sky: linear-gradient(180deg, #5E97E6 0%, #9CC3F2 42%, #DCEAFA 78%, #F2F7FD 100%);
+  --sun: radial-gradient(circle at 86% 6%, #FFFFFF 0, rgba(255, 255, 255, .85) 2.5%, rgba(255, 248, 225, .35) 10%, rgba(255, 255, 255, 0) 32%);
+  --surface: radial-gradient(circle at 50% 0, #FFFFFF, #EEF5FD 12%, #DCE9F8 30%);
+  --stars: 0;
+  color-scheme: light;
+}
+
 :root {
   --code-bg: color-mix(in srgb, var(--fg) 5%, var(--bg));
   --error: #C5221F;
   --sans: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
   --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --wordmark: "Alex Wordmark", "Geist", var(--sans);
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
@@ -327,7 +426,6 @@ button {
   font-family: var(--serif);
   font-weight: 300;
   letter-spacing: -.015em;
-  font-variation-settings: "opsz" 60;
 }
 
 :root[data-look="crab"] .greeting-mark {
@@ -461,6 +559,40 @@ button {
   border-radius: 9px;
 }
 
+/* Takes the suggested question. Only orbit suggests one. */
+
+.use {
+  display: none;
+  grid-area: use;
+  align-self: center;
+  padding: 3px 8px;
+  border: 1px solid var(--composer-border);
+  border-radius: 8px;
+  background: var(--bubble);
+  color: var(--muted);
+  font: 500 11.5px/1.4 var(--sans);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.use:hover {
+  color: var(--fg);
+}
+
+.use-touch {
+  display: none;
+}
+
+@media (hover: none) {
+  .use-keys {
+    display: none;
+  }
+
+  .use-touch {
+    display: inline;
+  }
+}
+
 /* The attach button's excuse, in a bubble above it */
 
 .toast {
@@ -488,19 +620,28 @@ button {
   from { opacity: 0; transform: translateY(4px); }
 }
 
-/* The same switch, spelled out at the bottom of a brand-new chat */
+/* ---------- Footer: the other looks, and the legal line ----------
+ * The parodies only show it on a brand-new chat. Orbit keeps it for the whole visit. */
 
 .page-footer {
-  display: flex;
-  justify-content: center;
-  padding: 0 16px calc(8px + env(safe-area-inset-bottom, 0px));
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 4px 16px calc(10px + env(safe-area-inset-bottom, 0px));
 }
 
 .app:not(.is-empty) .page-footer {
   display: none;
 }
 
-.look-switch-inline {
+.looks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+.look-option {
   padding: 6px 12px;
   border: 0;
   border-radius: 999px;
@@ -510,8 +651,30 @@ button {
   cursor: pointer;
 }
 
-.look-switch-inline:hover {
+.look-option:hover {
   background: var(--hover);
+  color: var(--fg);
+}
+
+.legal {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.piva {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: copy;
+}
+
+.piva:hover {
   color: var(--fg);
 }
 
@@ -855,6 +1018,236 @@ button {
   to { transform: translateX(3px) rotate(8deg); }
 }
 
+/* ---------- Orbit ----------
+ * Alex's own look: a night sky over a planet, and a prompt in the middle.
+ * The parody furniture (model pickers, attach button, disclaimers) stays in the parodies. */
+
+.sky,
+.wordmark,
+.theme-toggle {
+  display: none;
+}
+
+.topbar,
+.main,
+.page-footer {
+  position: relative;
+  z-index: 1;
+}
+
+:root[data-look="orbit"] .sky {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--sky);
+}
+
+.sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--sun);
+}
+
+.sky canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: var(--stars);
+  transition: opacity .8s;
+}
+
+/* The planet sets once the conversation starts */
+.planet {
+  position: absolute;
+  top: calc(100% - 20vh);
+  left: 50%;
+  width: 260vmax;
+  height: 260vmax;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--glow) 60%, transparent),
+    0 -6px 18px -4px color-mix(in srgb, var(--glow) 45%, transparent),
+    0 -40px 120px -20px color-mix(in srgb, var(--glow) 22%, transparent);
+  transform: translateX(-50%);
+  transition: top 1.6s cubic-bezier(.6, 0, .2, 1), opacity 1.6s;
+}
+
+.app:not(.is-empty) .planet {
+  top: calc(100% + 6vh);
+  opacity: .5;
+}
+
+:root[data-look="orbit"] .wordmark {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  font: 400 15px/1 var(--wordmark);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+:root[data-look="orbit"] .app:not(.is-empty) .wordmark {
+  cursor: pointer;
+}
+
+:root[data-look="orbit"] .theme-toggle {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+
+:root[data-look="orbit"] .model-picker,
+:root[data-look="orbit"] .chat-title,
+:root[data-look="orbit"] .look-switch,
+:root[data-look="orbit"] .attach,
+:root[data-look="orbit"] .model-inline,
+:root[data-look="orbit"] .disclaimer,
+:root[data-look="orbit"] .app.is-empty #new-chat {
+  display: none;
+}
+
+:root[data-look="orbit"] .topbar {
+  padding: 12px 20px;
+}
+
+:root[data-look="orbit"] .messages,
+:root[data-look="orbit"] .dock-inner {
+  width: min(680px, 100%);
+}
+
+:root[data-look="orbit"] .hero {
+  min-height: 0;
+  padding-bottom: 8px;
+}
+
+:root[data-look="orbit"] .greeting {
+  font-size: clamp(26px, 4.2vw, 40px);
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -.025em;
+}
+
+:root[data-look="orbit"] .dock-inner {
+  gap: 16px;
+}
+
+:root[data-look="orbit"] .composer {
+  grid-template-columns: 1fr auto auto;
+  grid-template-areas: "prompt use send";
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 20px;
+  border-radius: 20px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+:root[data-look="orbit"] .composer:focus-within {
+  border-color: color-mix(in srgb, var(--glow) 55%, var(--composer-border));
+}
+
+:root[data-look="orbit"] .composer textarea {
+  padding: 9px 0;
+  font-size: 17px;
+  font-weight: 300;
+}
+
+:root[data-look="orbit"] .use {
+  display: block;
+}
+
+:root[data-look="orbit"] .use[hidden] {
+  display: none;
+}
+
+:root[data-look="orbit"] .send {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+}
+
+:root[data-look="orbit"] .app:not(.is-empty) .suggestions {
+  display: none;
+}
+
+:root[data-look="orbit"] .suggestions button {
+  padding: 7px 15px;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+:root[data-look="orbit"] .suggestions button:hover {
+  border-color: var(--muted);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+
+:root[data-look="orbit"] .user-message {
+  padding: 9px 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px 16px 4px 16px;
+}
+
+.bot-message[data-look="orbit"] {
+  max-width: 62ch;
+}
+
+.bot-message[data-look="orbit"] .body {
+  font-size: 16.5px;
+  line-height: 1.65;
+}
+
+.bot-message[data-look="orbit"] .actions {
+  display: none;
+}
+
+.thinking .plotting {
+  font-size: 13px;
+}
+
+.thinking .plotting::after {
+  content: "▍";
+  margin-left: 4px;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+:root[data-look="orbit"] .page-footer,
+:root[data-look="orbit"] .app:not(.is-empty) .page-footer {
+  display: grid;
+  gap: 14px;
+  padding-top: 18px;
+}
+
+:root[data-look="orbit"] .look-option {
+  padding: 6px 13px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  font-size: 13px;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+:root[data-look="orbit"] .look-option:hover {
+  border-color: var(--muted);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+
 /* ---------- Model menu ---------- */
 
 .model-menu {
@@ -983,6 +1376,57 @@ button {
   .user-message {
     max-width: 85%;
   }
+
+  /* Orbit stays centered on phones: title, prompt, then suggestions. */
+
+  :root[data-look="orbit"] .topbar {
+    padding: 10px 16px;
+  }
+
+  :root[data-look="orbit"] .wordmark {
+    font-size: 13px;
+  }
+
+  :root[data-look="orbit"] .app.is-empty .main {
+    justify-content: center;
+  }
+
+  :root[data-look="orbit"] .app.is-empty .dock,
+  :root[data-look="orbit"] .app.is-empty .dock-inner,
+  :root[data-look="orbit"] .hero {
+    flex: initial;
+  }
+
+  :root[data-look="orbit"] .composer,
+  :root[data-look="orbit"] .suggestions {
+    order: 0;
+  }
+
+  :root[data-look="orbit"] .suggestions {
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-inline: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  :root[data-look="orbit"] .suggestions button {
+    padding: 6px 13px;
+    font-size: 13px;
+  }
+
+  :root[data-look="orbit"] .composer textarea {
+    font-size: 16px;
+  }
+
+  :root[data-look="orbit"] .page-footer {
+    gap: 10px;
+    padding-top: 12px;
+  }
+
+  :root[data-look="orbit"] .app:not(.is-empty) .looks {
+    display: none;
+  }
 }
 
 /* ---------- Reduced motion ---------- */
@@ -991,6 +1435,7 @@ button {
   .thinking .dot,
   .thinking .shimmer,
   .thinking .crab,
+  .thinking .plotting::after,
   .toast {
     animation: none;
   }
@@ -998,7 +1443,9 @@ button {
   body,
   .composer,
   .send,
-  .user-message {
+  .user-message,
+  .planet,
+  .sky canvas {
     transition: none;
   }
 }

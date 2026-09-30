@@ -6,10 +6,11 @@
  */
 
 import {
-  OWNER, ownerEmail, LOOKS, MODELS, greetings, FUN_PROMPTS, SOURCES, THINKING_VERBS,
+  OWNER, LOOK_ORDER, LOOKS, MODELS, greetings, FUN_PROMPTS, FIRST_SUGGESTION, NEXT_QUESTIONS, SOURCES, THINKING_VERBS,
   OPENERS, SYCOPHANT_OPENERS, ATTACH_JOKES, FORM_PLACEHOLDERS, MINI_ANSWERS, INTENTS, SEARCHED_INTENTS, TOPICS, REASONING,
   ANSWERS, FLOW, LIMIT_NOTICE, NETWORK_ERROR, MODEL_QUIRKS
 } from './content.js';
+import { startSky } from './sky.js';
 
 /* ---------- Settings ---------- */
 
@@ -19,6 +20,7 @@ const SPAM_BURST = 4;
 const LONG_CHAT = 20;             // Messages sent before the "context window" gives up.
 const NETWORK_ERROR_RATE = 0.08;  // Reliability: 92%. Better than some real ones.
 const PROMPT_ROTATION_MS = 6000;
+const IDLE_MS = 60000;            // Orbit keeps a straight face for a minute. Then the fake prompts drift in.
 
 /* ---------- Elements ---------- */
 
@@ -30,6 +32,7 @@ const thread = $('thread');
 const messages = $('messages');
 const prompt = $('prompt');
 const sendButton = $('send');
+const useButton = $('use');
 const menu = $('model-menu');
 
 /* ---------- Small helpers ---------- */
@@ -217,7 +220,9 @@ function actionBar(message) {
 
 function thinkingIndicator(look, label) {
   const indicator = element('div', 'thinking');
-  if (look === 'crab') {
+  if (look === 'orbit') {
+    indicator.append(element('span', 'plotting', label || 'Plotting a course'));
+  } else if (look === 'crab') {
     indicator.append(element('span', 'crab', '🦀'), element('span', 'verb', label || pick(THINKING_VERBS)));
   } else {
     indicator.append(element('span', 'dot'));
@@ -254,7 +259,8 @@ async function respond(produce, existing = null) {
   const indicator = message.appendChild(thinkingIndicator(look, produce.thinkingLabel?.(look)));
   scrollToEnd();
 
-  const thinkingTime = produce.thinkingTime
+  const custom = typeof produce.thinkingTime === 'function' ? produce.thinkingTime(look) : produce.thinkingTime;
+  const thinkingTime = custom
     || (look === 'knot' && selectedModel.knot === 'Aldebaran 5 Thinking' ? [1800, 3000] : settings.thinkingTime);
   const [output] = await Promise.all([produce(look, message), sleep(between(thinkingTime))]);
   const reply = typeof output === 'string' ? { markdown: output } : output;
@@ -325,6 +331,9 @@ function renderAfterwords(message, { sources, button }) {
 
 function answer(intent, question, withOpener = true) {
   const produce = async (look, message) => {
+    // Orbit just answers. No network drama, no free plan, no "great question".
+    if (look === 'orbit') return intent === 'contact' ? FLOW.askName.orbit() : variant(ANSWERS[intent].orbit, message);
+
     const model = selectedModel[look];
     const repliesSoFar = messages.querySelectorAll('.bot-message.is-done').length;
     if (!message.retried && repliesSoFar > 1 && Math.random() < NETWORK_ERROR_RATE) return { error: true };
@@ -333,12 +342,7 @@ function answer(intent, question, withOpener = true) {
     const dumbedDown = (look === 'knot' && limited.knot) || model === 'Lame 5';
     if (intent !== 'contact' && dumbedDown) return pick(MINI_ANSWERS[look]);
 
-    const options = ANSWERS[intent][look];
-    let index = Math.floor(Math.random() * options.length);
-    if (options.length > 1 && index === message.lastIndex) index = (index + 1) % options.length;
-    message.lastIndex = index;
-
-    let markdown = intent === 'contact' ? FLOW.askName[look]() : options[index];
+    let markdown = intent === 'contact' ? FLOW.askName[look]() : variant(ANSWERS[intent][look], message);
     const separator = /^[#-]/.test(markdown) ? '\n\n' : ' ';
     if (look === 'knot' && model === 'Aldebaran 4o') {
       markdown = pick(SYCOPHANT_OPENERS) + separator + markdown;
@@ -359,10 +363,18 @@ function answer(intent, question, withOpener = true) {
   };
 
   if (SEARCHED_INTENTS.includes(intent)) {
-    produce.thinkingLabel = look => (look === 'knot' ? 'Searching 3 sources…' : 'Searching the web…');
-    produce.thinkingTime = [1400, 2200];
+    produce.thinkingLabel = look => ({ knot: 'Searching 3 sources…', crab: 'Searching the web…' })[look];
+    produce.thinkingTime = look => (look === 'orbit' ? null : [1400, 2200]);
   }
   return respond(produce);
+}
+
+// Another version of the same answer, never the same one twice in a row.
+function variant(options, message) {
+  let index = Math.floor(Math.random() * options.length);
+  if (options.length > 1 && index === message.lastIndex) index = (index + 1) % options.length;
+  message.lastIndex = index;
+  return options[index];
 }
 
 function say(step, extras) {
@@ -402,7 +414,7 @@ function hitLimit(look) {
 function syncLimits() {
   const look = currentLook();
   $('limit-banner').hidden = !limited[look];
-  $('limit-text').textContent = LIMIT_NOTICE[look](resetsAt[look]);
+  $('limit-text').textContent = LIMIT_NOTICE[look]?.(resetsAt[look]) ?? '';
   $('model-name').textContent = limited.knot ? 'Aldebaran 5 mini' : selectedModel.knot;
   $('model-inline-name').textContent = selectedModel.crab;
   syncComposer();
@@ -410,19 +422,58 @@ function syncLimits() {
 
 let funPrompt = pick(FUN_PROMPTS);
 
+/* ---------- Orbit's suggestion ----------
+ * One question always waits in the input. Send it as it is, press Tab, or tap Use.
+ * After a minute without typing, the fake prompts take over the placeholder. */
+
+let suggestion = FIRST_SUGGESTION;
+let drifting = false;
+let lastActivity = Date.now();
+const asked = new Set();
+
+const offered = () => (drifting ? funPrompt : suggestion);
+const canUseSuggestion = () => currentLook() === 'orbit' && !form.step && !busy && !prompt.value && !prompt.disabled;
+
+function nextSuggestion(intent) {
+  const preferred = NEXT_QUESTIONS[intent] || NEXT_QUESTIONS.fallback;
+  if (preferred === 'Surprise me' || !asked.has(preferred)) return preferred;
+  return suggestionTexts.find(text => !asked.has(text)) || 'Surprise me';
+}
+
+// Whatever is on display goes in, fake prompt included. What you see is what you get.
+function useSuggestion() {
+  if (!canUseSuggestion()) return;
+  prompt.value = offered();
+  drifting = false;
+  autoGrow();
+  syncComposer();
+  prompt.focus();
+  prompt.setSelectionRange(prompt.value.length, prompt.value.length);
+}
+
+// Any sign of life restarts the one-minute countdown. A fake prompt already on display stays put
+// until the visitor types, sends or takes it: it would be rude to swap it mid-click.
+const markActive = () => { lastActivity = Date.now(); };
+
 function syncComposer() {
-  const outOfMessages = currentLook() === 'crab' && limited.crab;
+  const look = currentLook();
+  const outOfMessages = look === 'crab' && limited.crab;
   const locked = outOfMessages || chatIsFull;
+  const orbit = look === 'orbit';
 
   prompt.disabled = locked;
   if (chatIsFull) prompt.placeholder = 'Start a new chat to continue';
   else if (outOfMessages) prompt.placeholder = `Out of free messages until ${resetsAt.crab}`;
   else if (form.step) prompt.placeholder = FORM_PLACEHOLDERS[form.step];
-  else if (botAsked) prompt.placeholder = LOOKS[currentLook()].replyPlaceholder;
+  else if (orbit) prompt.placeholder = offered();
+  else if (botAsked) prompt.placeholder = LOOKS[look].replyPlaceholder;
   else prompt.placeholder = funPrompt;
 
   document.querySelectorAll('#suggestions button').forEach(b => { b.disabled = locked; });
-  sendButton.disabled = locked || busy || !prompt.value.trim();
+  useButton.hidden = !canUseSuggestion();
+  // In orbit an empty input still has something to send: the suggestion.
+  const hasText = Boolean(prompt.value.trim()) || (orbit && !form.step);
+  sendButton.disabled = locked || busy || !hasText;
 }
 
 // Fake prompts step aside while the assistant is waiting for a real answer.
@@ -431,7 +482,7 @@ const funPromptsPaused = () => Boolean(form.step) || botAsked;
 // Clicking the empty input adopts the fake prompt on display, ready to send or edit.
 // Nobody wants to type "Draw me a cat" when it's already right there.
 function adoptFunPrompt() {
-  if (prompt.value || prompt.disabled || funPromptsPaused()) return;
+  if (currentLook() === 'orbit' || prompt.value || prompt.disabled || funPromptsPaused()) return;
   prompt.value = funPrompt;
   autoGrow();
   syncComposer();
@@ -452,7 +503,13 @@ function showAttachJoke() {
 }
 
 function rotateFunPrompt() {
-  if (prompt.value || prompt.disabled || funPromptsPaused()) return;
+  if (currentLook() === 'orbit') {
+    const idle = Date.now() - lastActivity >= IDLE_MS;
+    if (!idle || prompt.value || form.step || busy) return;
+    drifting = true;
+  } else if (prompt.value || prompt.disabled || funPromptsPaused()) {
+    return;
+  }
   funPrompt = pick(FUN_PROMPTS.filter(p => p !== funPrompt));
   syncComposer();
 }
@@ -490,11 +547,14 @@ const emptyForm = () => ({ step: null, name: '', message: '', contact: '', follo
 let form = emptyForm();
 let offer = null;
 
-function finishForm() {
+async function finishForm() {
   form.step = null;
   form.followUps = 0;
-  offer = 'followUp';
-  return say('recap');
+  // Orbit doesn't do the follow-up bit. It has some dignity.
+  offer = currentLook() === 'orbit' ? null : 'followUp';
+  await say('recap');
+  suggestion = nextSuggestion('recap');
+  syncComposer();
 }
 
 function route(text) {
@@ -543,7 +603,7 @@ function route(text) {
   }
 
   const intent = classify(text);
-  if (intent === 'yes' && offer === 'followUp') {
+  if (intent === 'yes' && offer === 'followUp' && currentLook() !== 'orbit') {
     form.followUps++;
     if (form.followUps >= 3) {
       offer = null;
@@ -561,8 +621,13 @@ async function reply(intent, question, withOpener = true) {
   if (intent === 'contact') form = { ...emptyForm(), step: 'name' };
 
   await answer(intent, question, withOpener);
+  if (look === 'orbit' && intent !== 'contact') {
+    suggestion = nextSuggestion(intent);
+    syncComposer();
+  }
 
-  const counts = intent !== 'contact' && !limited[look];
+  // Orbit has no free plan to run out of.
+  const counts = look !== 'orbit' && intent !== 'contact' && !limited[look];
   if (counts && (++questionsAsked[look] >= QUESTION_LIMIT || spamming)) hitLimit(look);
 }
 
@@ -580,6 +645,9 @@ async function ask(text) {
   if (!text || busy || prompt.disabled) return;
 
   trackSpam(text);
+  markActive();
+  drifting = false;
+  asked.add(text);
   prompt.value = '';
   autoGrow();
   app.classList.remove('is-empty');
@@ -590,7 +658,14 @@ async function ask(text) {
   messageCount++;
 
   await route(text);
-  if (!form.step && !chatIsFull && messageCount >= LONG_CHAT) await compressChat();
+  if (currentLook() !== 'orbit' && !form.step && !chatIsFull && messageCount >= LONG_CHAT) await compressChat();
+}
+
+// Enter or the send button. An empty input in orbit sends whatever is on offer.
+function submit() {
+  const typed = prompt.value.trim();
+  if (typed) return ask(typed);
+  if (canUseSuggestion()) return ask(offered());
 }
 
 function newChat() {
@@ -603,6 +678,10 @@ function newChat() {
   messageCount = 0;
   botAsked = false;
   chatIsFull = false;
+  suggestion = FIRST_SUGGESTION;
+  drifting = false;
+  asked.clear();
+  markActive();
   syncComposer();
   if (!prompt.disabled) prompt.focus();
 }
@@ -650,31 +729,68 @@ function openMenu(anchor, look) {
   menu.querySelector('[aria-checked="true"]').focus();
 }
 
-/* ---------- Switching looks ---------- */
+/* ---------- Switching looks ----------
+ * Orbit is night by default, day if the visitor asks, and keeps that choice for the visit.
+ * The parodies ignore it and follow the visitor's system setting, as the real ones do. */
 
-function setLook(look, announce = false) {
+let orbitTheme = 'dark';
+
+const THEME_ICONS = {
+  sun: '<svg width="15" height="15" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 1.8v2.4M10 15.8v2.4M1.8 10h2.4M15.8 10h2.4M4.2 4.2l1.7 1.7M14.1 14.1l1.7 1.7M4.2 15.8l1.7-1.7M14.1 5.9l1.7-1.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  moon: '<svg width="15" height="15" viewBox="0 0 20 20" aria-hidden="true"><path d="M16.5 12.3A7 7 0 0 1 7.7 3.5a7 7 0 1 0 8.8 8.8Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>'
+};
+
+function syncTheme() {
+  if (currentLook() !== 'orbit') {
+    delete root.dataset.theme;
+    return;
+  }
+  const day = orbitTheme === 'light';
+  const label = day ? 'Switch to night' : 'Switch to day';
+  root.dataset.theme = orbitTheme;
+  $('theme-toggle').innerHTML = day ? THEME_ICONS.moon : THEME_ICONS.sun;
+  $('theme-toggle').title = label;
+  $('theme-toggle').setAttribute('aria-label', label);
+}
+
+function setLook(look) {
+  const previous = currentLook();
   const settings = LOOKS[look];
-  const other = LOOKS[settings.other];
 
   root.dataset.look = look;
   closeMenu();
-  $('disclaimer').textContent = settings.disclaimer;
+  syncTheme();
   $('greeting').textContent = pick(greetings(look));
-  $('look-switch-emoji').textContent = other.emoji;
-  $('look-switch').setAttribute('aria-label', `Switch to ${other.label}`);
-  $('look-switch').title = `Switch to ${other.label} ${other.emoji}`;
-  $('look-switch-inline').textContent = `Switch to ${other.brand} ${other.emoji}`;
+  $('disclaimer').textContent = settings.disclaimer || '';
   $('model-picker').style.visibility = look === 'knot' ? 'visible' : 'hidden';
   $('chat-title').classList.toggle('is-visible', look === 'crab' && !app.classList.contains('is-empty'));
-  syncLimits();
 
-  if (announce && !app.classList.contains('is-empty')) {
-    messages.append(element('div', 'system-note', `Switched to ${settings.brand} ${settings.label} ${settings.emoji}`));
-    scrollToEnd();
+  if (settings.other) {
+    const other = LOOKS[settings.other];
+    $('look-switch-emoji').textContent = other.emoji;
+    $('look-switch').setAttribute('aria-label', `Switch to ${other.label}`);
+    $('look-switch').title = `Switch to ${other.label} ${other.emoji}`;
   }
 
+  // The footer always offers the two looks you're not in.
+  LOOK_ORDER.filter(l => l !== look).forEach((l, i) => {
+    const option = $(`look-option-${i + 1}`);
+    option.dataset.look = l;
+    option.textContent = LOOKS[l].switchLabel;
+  });
+
+  if (previous !== look) {
+    offer = null;
+    drifting = false;
+    if (!app.classList.contains('is-empty')) {
+      messages.append(element('div', 'system-note', settings.switchedNote));
+      scrollToEnd();
+    }
+  }
+  syncLimits();
+
   try {
-    history.replaceState(null, '', look === 'crab' ? '#crab' : location.pathname + location.search);
+    history.replaceState(null, '', look === 'orbit' ? location.pathname + location.search : `#${look}`);
   } catch {
     // Some hosts won't let us touch the URL. The crab doesn't mind.
   }
@@ -689,29 +805,56 @@ function autoGrow() {
 
 prompt.addEventListener('click', adoptFunPrompt);
 $('attach').addEventListener('click', showAttachJoke);
+useButton.addEventListener('click', useSuggestion);
 
 prompt.addEventListener('input', () => {
+  markActive();
+  drifting = false;
   autoGrow();
   syncComposer();
 });
 
 prompt.addEventListener('keydown', event => {
-  if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+  markActive();
+  if (event.key === 'Tab' && !event.shiftKey && canUseSuggestion()) {
     event.preventDefault();
-    ask(prompt.value);
+    useSuggestion();
+  } else if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+    event.preventDefault();
+    submit();
   }
 });
+document.addEventListener('pointerdown', markActive);
 
 $('composer').addEventListener('submit', event => {
   event.preventDefault();
-  ask(prompt.value);
+  submit();
 });
 
 document.querySelectorAll('#suggestions button').forEach(b => b.addEventListener('click', () => ask(b.textContent)));
-$('look-switch').addEventListener('click', () => setLook(LOOKS[currentLook()].other, true));
-$('look-switch-inline').addEventListener('click', () => setLook(LOOKS[currentLook()].other));
+$('look-switch').addEventListener('click', () => {
+  const other = LOOKS[currentLook()].other;
+  if (other) setLook(other);
+});
+document.querySelectorAll('.look-option').forEach(b => b.addEventListener('click', () => setLook(b.dataset.look)));
 $('new-chat').addEventListener('click', newChat);
+$('wordmark').addEventListener('click', () => { if (!app.classList.contains('is-empty')) newChat(); });
 $('upgrade').addEventListener('click', upgrade);
+
+$('theme-toggle').addEventListener('click', () => {
+  orbitTheme = orbitTheme === 'light' ? 'dark' : 'light';
+  syncTheme();
+});
+
+// Tax number, one click away. The most useful button on this site, and the least fun.
+$('piva').addEventListener('click', () => {
+  const piva = $('piva');
+  copyToClipboard('IT08886490963', () => {
+    piva.textContent = 'P.IVA copied';
+    setTimeout(() => { piva.textContent = 'P.IVA: IT08886490963'; }, 1600);
+  });
+});
+$('year').textContent = new Date().getFullYear();
 
 $('model-picker').addEventListener('click', event => {
   event.stopPropagation();
@@ -733,7 +876,8 @@ document.addEventListener('keydown', event => {
 addEventListener('resize', closeMenu);
 
 setInterval(rotateFunPrompt, PROMPT_ROTATION_MS);
-setLook(location.hash === '#crab' ? 'crab' : 'knot');
+setLook(LOOKS[location.hash.slice(1)] ? location.hash.slice(1) : 'orbit');
+startSky({ stars: $('stars'), meteors: $('meteors'), isVisible: () => currentLook() === 'orbit' && orbitTheme === 'dark' });
 
 console.log(
   '%c👀 Looking under the hood?%c\nThere is no model. There never was. Just regex and good intentions.\nIf you want to talk to Alex, ask the chat: "How do I reach Alex?"',
