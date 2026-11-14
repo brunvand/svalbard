@@ -697,7 +697,9 @@ export const FACTS = {
     about: 'site',
     say: ["Alex, with Claude as the intern. Plain HTML, CSS and JavaScript, no frameworks. The source is one right-click away, and it talks back."]
   },
+  // The one answer every look gives straight: no flattery, no made-up sources.
   privacy: {
+    plain: true,
     when: [['privacy'], ['you', 'datatool']],
     say: ["No cookies, no analytics, and nothing you type leaves your browser or gets recorded. Ironic, for a man who tracks conversions for a living.\n\nThe only data in play is the standard server log of the host, GitHub Pages, which sees your IP address like any web server does."]
   },
@@ -1072,9 +1074,11 @@ export const ANSWERS = {
 };
 
 // Facts answer like everything else: with an opener, a fake search and fake reasoning in the parodies.
+// A plain one skips all three.
 for (const [id, fact] of Object.entries(FACTS)) {
   if (!fact.say) continue;
-  ANSWERS[id] = { fact: true, opener: true, orbit: fact.say, knot: fact.knot, crab: fact.crab };
+  ANSWERS[id] = { fact: true, plain: fact.plain, opener: !fact.plain, orbit: fact.say, knot: fact.knot, crab: fact.crab };
+  if (fact.plain) continue;
   SEARCHED_INTENTS.push(id);
   TOPICS[id] = "Alex's career";
 }

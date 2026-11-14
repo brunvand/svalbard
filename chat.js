@@ -340,6 +340,7 @@ function answer(ids, question, withOpener = true, lead = '') {
 
     // Orbit just answers. No network drama, no free plan, no "great question".
     if (look === 'orbit') return first === 'contact' ? FLOW.askName.orbit() : wording();
+    if (ANSWERS[first].plain) return wording();
 
     const model = selectedModel[look];
     const repliesSoFar = messages.querySelectorAll('.bot-message.is-done').length;
@@ -696,7 +697,7 @@ async function reply({ ids, lead = '', miss = false, message = '' }, question, w
   if (intent === 'contact') form = { ...emptyForm(), step: 'name', message };
 
   // Orbit owns up when it has nothing new to say. The parodies repeat themselves with a straight face.
-  const repeated = look === 'orbit' && ids.length === 1 && memory.told[intent] && SEARCHED_INTENTS.includes(intent);
+  const repeated = look === 'orbit' && ids.length === 1 && memory.told[intent] && (SEARCHED_INTENTS.includes(intent) || ANSWERS[intent].plain);
   if (miss) lead = pick(MISS_LEADS);
   else if (repeated && !lead) lead = pick(REPEAT_LEADS);
 
