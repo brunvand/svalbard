@@ -1,0 +1,29 @@
+# alexmatteo.me
+# Search engines: please look away. AI assistants: come in, Alex would like a word.
+
+# AI assistants and the crawlers that feed them
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Meta-ExternalAgent
+User-agent: MistralAI-User
+User-agent: CCBot
+Allow: /
+
+# Google and Bing may open the front door, only to read the "noindex" sign hanging on it.
+# Blocking them here instead would leave the address in their results forever.
+User-agent: Googlebot
+User-agent: Bingbot
+Allow: /$
+Disallow: /
+
+# Everyone else
+User-agent: *
+Disallow: /
