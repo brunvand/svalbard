@@ -1,0 +1,99 @@
+# Alex Matteo: the paid media and conversion tracking problems he gets called for
+
+> Alex Matteo is a full-stack marketer based in Milan, Italy. He has run paid campaigns since 2013 and fixes conversion tracking for a living. Below are the problems he is usually called for, with what tends to be behind each one. The actual fix depends on the setup, and he would rather look at yours than guess: reach him through https://alexmatteo.me
+
+## Paid media
+
+### My cost per acquisition keeps rising and I changed nothing. Why?
+
+Something changed, just not in your account. A tracking problem looks exactly like a performance problem, and telling the two apart comes before touching a single bid.
+
+### Smart bidding brings volume, but the leads are junk. What do I do?
+
+The algorithm is doing what it was asked: finding the cheapest form fills. The fix is in what you ask it for, not in the bids.
+
+### Performance Max looks great, but my brand search campaign is shrinking. Is it cannibalizing?
+
+Probably. Performance Max will happily take credit for people who were already looking for you. Whether it earns its numbers or borrows them is a question with a testable answer.
+
+### My campaign is stuck in the learning phase. How do I get it out?
+
+Usually too many campaigns are sharing too few conversions, and someone edits them every other day. The cure is structural, which is why one more budget tweak never works.
+
+### Google Ads and GA4 show different conversion numbers. Which one is wrong?
+
+Usually neither. They count different things on different days, so a gap is normal. A gap that suddenly changes is the one worth a call.
+
+### Meta reports far more conversions than GA4. Why?
+
+Meta counts people who saw an ad and never clicked. GA4 only sees who arrived. Part of the gap is by design. When it is close to exactly double, it is a setup mistake.
+
+## Conversion tracking
+
+### My conversions dropped right after we installed a cookie banner. Is tracking broken?
+
+Part of the drop is real: people who decline are no longer tracked. The rest is usually the banner and the tags disagreeing about timing, and that part can be recovered.
+
+### Enhanced conversions say "Needs attention" although every upload succeeds. What is going on?
+
+"Success" only means the request was well formed. The diagnostics judge something else, and on server-side setups the documentation runs out long before the problem does. Alex and the guy behind OneView (oneviewhub.com) worked through exactly this one, alert by alert, until the account read "Excellent". Google now passes that setup around as a best case.
+
+### My offline conversion imports don't match. What should I check?
+
+Somewhere between the ad click and the CRM, the thread that ties the two together gets cut. Finding where is most of the job.
+
+### One purchase is being counted twice. How do I stop duplicates?
+
+Either the same event is sent twice, or two implementations are running side by side without knowing about each other. It is rarely the platform's fault.
+
+### Is server-side tagging worth it?
+
+Sometimes. It depends on how much you rely on ad platforms and how much signal you are losing. It is not a way around consent, and it is one more system that can fail silently. Alex works on a fully server-side setup every day and will tell you honestly whether you need one.
+
+### Meta's pixel and the Conversions API are both installed. Do I get double counting?
+
+Only if Meta can't tell that the two events are the same one. Conversions that suddenly double are the classic symptom.
+
+## Google Analytics 4
+
+### What is "Unassigned" traffic in GA4, and why is there so much of it?
+
+GA4 received a source it couldn't file under any channel. The cause is almost always upstream, in how links are tagged or how events are sent.
+
+### What does "(not set)" mean in GA4 reports?
+
+That GA4 has no value at all for that dimension. It is more worrying than Unassigned, because the input is missing rather than misnamed.
+
+### My sales are attributed to my payment provider. How do I fix it?
+
+The customer left to pay, came back as a new visit, and the payment page took the credit. A known problem with a known fix, though the fix only repairs data going forward. The sooner, the better.
+
+### Direct traffic suddenly spiked in GA4. Where is it coming from?
+
+Direct is where traffic lands when its origin was lost. Real direct traffic rarely changes overnight. A tracking gap does.
+
+### My GA4 reports are empty or missing data. Is my setup broken?
+
+Not necessarily. GA4 is slow, and sometimes it withholds data on purpose. Telling a delay, a privacy threshold and a dead tag apart takes minutes if you know where to look.
+
+### What is the difference between a key event in GA4 and a conversion in Google Ads?
+
+A key event is something you marked as important in GA4. A conversion is what Google Ads bids on. They are related, they count differently, and letting both count the same action is how double counting starts.
+
+## Google Tag Manager
+
+### My tag isn't firing in Google Tag Manager. How do I debug it?
+
+There are about four usual suspects, and one of them is embarrassingly simple. The quiet ones are the problem: nothing errors, the tag just never runs.
+
+### My tag fires twice. Why?
+
+Either the page loads the same thing twice, or one trigger is matching two events. Common on single-page apps, and on sites with a tagging history nobody remembers.
+
+### My consent mode setup looks right, but Google says consent signals are missing. Why?
+
+Usually it is a matter of order: the consent state arrived after the tags that needed it. A setup can look right in the banner and still be wrong in the sequence.
+
+## Getting it fixed
+
+Every answer above stops at the diagnosis on purpose. The fix depends on how the site, the tags and the ad accounts are wired together. Alex reads setups for a living: https://alexmatteo.me

@@ -6,10 +6,11 @@
  */
 
 import {
-  OWNER, LOOK_ORDER, LOOKS, MODELS, greetings, FUN_PROMPTS, FIRST_SUGGESTION, NEXT_QUESTIONS, SOURCES, THINKING_VERBS,
-  OPENERS, SYCOPHANT_OPENERS, ATTACH_JOKES, FORM_PLACEHOLDERS, MINI_ANSWERS, INTENTS, SEARCHED_INTENTS, TOPICS, REASONING,
-  ANSWERS, FLOW, LIMIT_NOTICE, NETWORK_ERROR, MODEL_QUIRKS
+  OWNER, LOOK_ORDER, LOOKS, MODELS, greetings, FUN_PROMPTS, FIRST_SUGGESTION, NEXT_QUESTIONS, TOUR, SOURCES, THINKING_VERBS,
+  OPENERS, SYCOPHANT_OPENERS, ATTACH_JOKES, FORM_PLACEHOLDERS, MINI_ANSWERS, SEARCHED_INTENTS, TOPICS, REASONING,
+  ANSWERS, MISS_LEADS, REPEAT_LEADS, DID_YOU_MEAN, FLOW, LIMIT_NOTICE, NETWORK_ERROR, MODEL_QUIRKS
 } from './content.js';
+import { understand, remember, newMemory } from './brain.js';
 import { startSky } from './sky.js';
 
 /* ---------- Settings ---------- */
@@ -65,7 +66,8 @@ function copyToClipboard(text, onCopied) {
 
 /* ---------- Reading the visitor's message ---------- */
 
-const classify = text => (INTENTS.find(([, pattern]) => pattern.test(text)) || ['fallback'])[0];
+let memory = newMemory();
+const read = text => understand(text, memory);
 const isQuestion = text => /\?\s*$/.test(text);
 const isCancel = text => /^(cancel|stop|never ?mind|forget it)\b/i.test(text.trim());
 const stripMarkup = text => text.replace(/[*`]/g, '').trim();
@@ -313,15 +315,15 @@ function renderReply(message, { note, reasoning }) {
   message.append(element('div', 'body'));
 }
 
-function renderAfterwords(message, { sources, button }) {
+function renderAfterwords(message, { sources, button, buttons = button ? [button] : [] }) {
   if (sources) {
     const row = message.appendChild(element('div', 'sources'));
     row.append(element('span', 'sources-label', 'Sources'), ...sources.map(s => element('span', null, s)));
   }
-  if (button) {
-    const b = message.appendChild(element('button', 'pill-button', button.label));
+  for (const { label, onClick } of buttons) {
+    const b = message.appendChild(element('button', 'pill-button', label));
     b.type = 'button';
-    b.addEventListener('click', button.onClick);
+    b.addEventListener('click', onClick);
   }
   message.append(actionBar(message));
   message.classList.add('is-done');
@@ -329,10 +331,16 @@ function renderAfterwords(message, { sources, button }) {
 
 /* ---------- Choosing what to say ---------- */
 
-function answer(intent, question, withOpener = true) {
+function answer(ids, question, withOpener = true, lead = '') {
+  const [first] = ids;
+  const searched = ids.some(id => SEARCHED_INTENTS.includes(id));
+
   const produce = async (look, message) => {
+    const wording = () => lead + ids.map(id => variant(ANSWERS[id][look] || ANSWERS[id].orbit, message)).join('\n\n');
+
     // Orbit just answers. No network drama, no free plan, no "great question".
-    if (look === 'orbit') return intent === 'contact' ? FLOW.askName.orbit() : variant(ANSWERS[intent].orbit, message);
+    if (look === 'orbit') return first === 'contact' ? FLOW.askName.orbit() : wording();
+    if (ANSWERS[first].plain) return wording();
 
     const model = selectedModel[look];
     const repliesSoFar = messages.querySelectorAll('.bot-message.is-done').length;
@@ -340,13 +348,13 @@ function answer(intent, question, withOpener = true) {
 
     // Contact always works. Even the cheap models know where the money is.
     const dumbedDown = (look === 'knot' && limited.knot) || model === 'Lame 5';
-    if (intent !== 'contact' && dumbedDown) return pick(MINI_ANSWERS[look]);
+    if (first !== 'contact' && dumbedDown) return pick(MINI_ANSWERS[look]);
 
-    let markdown = intent === 'contact' ? FLOW.askName[look]() : variant(ANSWERS[intent][look], message);
+    let markdown = first === 'contact' ? FLOW.askName[look]() : wording();
     const separator = /^[#-]/.test(markdown) ? '\n\n' : ' ';
     if (look === 'knot' && model === 'Aldebaran 4o') {
       markdown = pick(SYCOPHANT_OPENERS) + separator + markdown;
-    } else if (withOpener && ANSWERS[intent].opener) {
+    } else if (withOpener && ANSWERS[first].opener) {
       markdown = pick(OPENERS[look][question ? 'question' : 'statement']) + separator + markdown;
     }
 
@@ -354,15 +362,15 @@ function answer(intent, question, withOpener = true) {
     if (quirk) markdown = (quirk.prefix || '') + markdown + (quirk.suffix || '');
 
     const deepThinker = look === 'knot' && model === 'Aldebaran 5 Thinking';
-    const reasoning = TOPICS[intent] && (deepThinker || Math.random() < 0.5)
-      ? { seconds: Math.round(deepThinker ? 60 + Math.random() * 340 : 12 + Math.random() * 85), text: REASONING[look](TOPICS[intent]) }
+    const reasoning = TOPICS[first] && (deepThinker || Math.random() < 0.5)
+      ? { seconds: Math.round(deepThinker ? 60 + Math.random() * 340 : 12 + Math.random() * 85), text: REASONING[look](TOPICS[first]) }
       : null;
-    const sources = SEARCHED_INTENTS.includes(intent) ? shuffle(SOURCES).slice(0, 3) : null;
+    const sources = searched ? shuffle(SOURCES).slice(0, 3) : null;
 
     return { markdown, reasoning, sources };
   };
 
-  if (SEARCHED_INTENTS.includes(intent)) {
+  if (searched) {
     produce.thinkingLabel = look => ({ knot: 'Searching 3 sources…', crab: 'Searching the web…' })[look];
     produce.thinkingTime = look => (look === 'orbit' ? null : [1400, 2200]);
   }
@@ -435,9 +443,16 @@ const offered = () => (drifting ? funPrompt : suggestion);
 const canUseSuggestion = () => currentLook() === 'orbit' && !form.step && !busy && !prompt.value && !prompt.disabled;
 
 function nextSuggestion(intent) {
-  const preferred = NEXT_QUESTIONS[intent] || NEXT_QUESTIONS.fallback;
+  const preferred = NEXT_QUESTIONS[intent] || (ANSWERS[intent]?.fact && NEXT_QUESTIONS.fact);
+  // Small talk and shrugs change nothing: the question that was waiting keeps waiting.
+  if (!preferred) return asked.has(suggestion) ? nextOnTour() : suggestion;
   if (preferred === 'Surprise me' || !asked.has(preferred)) return preferred;
-  return suggestionTexts.find(text => !asked.has(text)) || 'Surprise me';
+  return nextOnTour();
+}
+
+function nextOnTour() {
+  const stop = TOUR.find(([question, answer]) => !asked.has(question) && !memory.told[answer]);
+  return stop ? stop[0] : 'Surprise me';
 }
 
 // Whatever is on display goes in, fake prompt included. What you see is what you get.
@@ -546,6 +561,7 @@ const suggestionTexts = [...document.querySelectorAll('#suggestions button')].ma
 const emptyForm = () => ({ step: null, name: '', message: '', contact: '', followUps: 0 });
 let form = emptyForm();
 let offer = null;
+let unanswered = '';
 
 async function finishForm() {
   form.step = null;
@@ -565,13 +581,17 @@ function route(text) {
     return say('cancel');
   }
   // Clicking a suggestion (or asking a real question) mid-form abandons the form.
-  if (form.step && (suggestionTexts.includes(text) || (form.step === 'name' && question && classify(text) !== 'fallback'))) {
+  if (form.step && (suggestionTexts.includes(text) || (form.step === 'name' && question && read(text).known))) {
     form.step = null;
   }
 
   switch (form.step) {
     case 'name':
       form.name = findName(text);
+      if (form.message) {
+        form.step = 'contact';
+        return say('askContactForQuestion');
+      }
       form.step = 'message';
       return say('askMessage', look => (look === 'knot' ? { note: 'Memory updated' } : {}));
 
@@ -587,10 +607,10 @@ function route(text) {
         form.contact = stripMarkup(contact);
         return finishForm();
       }
-      const intent = classify(text);
-      if (intent !== 'fallback' && intent !== 'contact') {
+      const understood = read(text);
+      if (understood.known && understood.ids[0] !== 'contact') {
         form.step = null;
-        return reply(intent, question);
+        return reply(understood, question);
       }
       return say('invalidContact');
     }
@@ -602,7 +622,12 @@ function route(text) {
     return say('askNameSpotted');
   }
 
-  const intent = classify(text);
+  if (/^\/misses\b/i.test(text)) return showMisses(/clear/i.test(text));
+
+  const understood = read(text);
+  const [intent] = understood.ids;
+  if ((!understood.known && intent !== 'nomore') || understood.guessed) noteMiss(text);
+  if (understood.options) return didYouMean(understood.options);
   if (intent === 'yes' && offer === 'followUp' && currentLook() !== 'orbit') {
     form.followUps++;
     if (form.followUps >= 3) {
@@ -611,18 +636,75 @@ function route(text) {
     }
     return say('followUp');
   }
-  if (intent === 'yes' && offer) return reply(offer, question, false);
-  return reply(intent, question);
+  if (intent === 'yes' && offer) return reply({ ids: [offer], message: unanswered }, question, false);
+
+  // A question we couldn't answer can still reach Alex: say yes, and it becomes the message.
+  unanswered = intent === 'fallback' ? `Your website couldn't answer this one: ${stripMarkup(text)}` : '';
+  return reply(understood, question);
 }
 
-async function reply(intent, question, withOpener = true) {
-  const look = currentLook();
-  offer = ANSWERS[intent].offer?.[look] || null;
-  if (intent === 'contact') form = { ...emptyForm(), step: 'name' };
+/* ---------- The notebook ----------
+ * Questions the assistant couldn't answer, kept in this browser only. Type /misses to read them,
+ * /misses clear to empty it. That's how it gets smarter: Alex reads the list, then writes the answers. */
 
-  await answer(intent, question, withOpener);
-  if (look === 'orbit' && intent !== 'contact') {
-    suggestion = nextSuggestion(intent);
+const MISSES_KEY = 'svalbard-misses';
+
+function readMisses() {
+  try {
+    return JSON.parse(localStorage.getItem(MISSES_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function noteMiss(text) {
+  try {
+    const misses = readMisses().filter(miss => miss !== text);
+    localStorage.setItem(MISSES_KEY, JSON.stringify([...misses, text.slice(0, 200)].slice(-200)));
+  } catch {
+    // No storage, no notebook. The assistant will simply stay this smart.
+  }
+}
+
+function showMisses(clear) {
+  const misses = readMisses();
+  if (clear) {
+    try { localStorage.removeItem(MISSES_KEY); } catch { /* Nothing to forget. */ }
+    return respond(async () => 'Notebook emptied.');
+  }
+  return respond(async () => (misses.length
+    ? `Questions I couldn't answer in this browser:\n\n\`\`\`misses\n${misses.join('\n')}\n\`\`\``
+    : "Nothing in the notebook. Either I'm very good, or nobody asked anything hard."));
+}
+
+// Two readings of one message, or one shaky one: ask instead of assuming. Each button asks the tidy version.
+async function didYouMean(options) {
+  await respond(async () => ({
+    markdown: pick(DID_YOU_MEAN),
+    buttons: options.map(({ question }) => ({ label: question, onClick: () => ask(question) }))
+  }));
+  if (currentLook() === 'orbit') {
+    suggestion = options[0].question;
+    syncComposer();
+  }
+}
+
+async function reply({ ids, lead = '', miss = false, message = '' }, question, withOpener = true) {
+  const look = currentLook();
+  const intent = ids[0];
+  const latest = ids[ids.length - 1];
+  offer = ANSWERS[intent].offer?.[look] || null;
+  if (intent === 'contact') form = { ...emptyForm(), step: 'name', message };
+
+  // Orbit owns up when it has nothing new to say. The parodies repeat themselves with a straight face.
+  const repeated = look === 'orbit' && ids.length === 1 && memory.told[intent] && (SEARCHED_INTENTS.includes(intent) || ANSWERS[intent].plain);
+  if (miss) lead = pick(MISS_LEADS);
+  else if (repeated && !lead) lead = pick(REPEAT_LEADS);
+
+  await answer(ids, question, withOpener, lead);
+  remember(memory, ids);
+  if (look === 'orbit' && intent !== 'contact' && latest !== 'nomore') {
+    suggestion = nextSuggestion(latest);
     syncComposer();
   }
 
@@ -680,6 +762,8 @@ function newChat() {
   chatIsFull = false;
   suggestion = FIRST_SUGGESTION;
   drifting = false;
+  memory = newMemory();
+  unanswered = '';
   asked.clear();
   markActive();
   syncComposer();
@@ -847,13 +931,15 @@ $('theme-toggle').addEventListener('click', () => {
 });
 
 // Tax number, one click away. The most useful button on this site, and the least fun.
-$('piva').addEventListener('click', () => {
-  const piva = $('piva');
+$('vat').addEventListener('click', () => {
+  const vat = $('vat');
   copyToClipboard('IT08886490963', () => {
-    piva.textContent = 'P.IVA copied';
-    setTimeout(() => { piva.textContent = 'P.IVA: IT08886490963'; }, 1600);
+    vat.textContent = 'VAT No. copied';
+    setTimeout(() => { vat.textContent = 'VAT No. IT08886490963'; }, 1600);
   });
 });
+// The whole privacy policy is one answer long, so the link just asks for it.
+$('privacy-link').addEventListener('click', () => ask('What happens to what I type here?'));
 $('year').textContent = new Date().getFullYear();
 
 $('model-picker').addEventListener('click', event => {
